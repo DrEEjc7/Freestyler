@@ -468,4 +468,4 @@ window.generateTypographyPair = generateTypographyPair
 window.generateBreakdown = generateBreakdown
 window.hexToHsl = hexToHsl
 window.hslToHex = hslToHex
-window.analyzeLogoColors = analyzeLogoColors
+window.analyzeLogoColors = analyzeLogoColors 
