@@ -1,291 +1,597 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Style Guide Generator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/preview.css">
-</head>
-<body>
-    <header class="header">
-        <div class="logo">Style Guide Generator</div>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-            <span id="themeIcon">🌙</span>
-            <span id="themeText">Dark</span>
-        </button>
-    </header>
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    <main class="main-content">
-        <div class="tool-container">
-            <div class="form-section">
-                <h2>Settings</h2>
-                
-                <div class="form-group">
-                    <label for="industry">Industry</label>
-                    <select id="industry">
-                        <option value="tech">Technology</option>
-                        <option value="finance">Finance</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="creative">Creative</option>
-                        <option value="legal">Legal</option>
-                        <option value="ecommerce">E-commerce</option>
-                    </select>
-                </div>
+:root {
+  /* Colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-grey-50: #f9fafb;
+  --color-grey-100: #f3f4f6;
+  --color-grey-200: #e5e7eb;
+  --color-grey-300: #d1d5db;
+  --color-grey-400: #9ca3af;
+  --color-grey-500: #6b7280;
+  --color-grey-600: #4b5563;
+  --color-grey-700: #374151;
+  --color-grey-800: #1f2937;
+  --color-grey-900: #111827;
 
-                <div class="form-group">
-                    <label for="positioning">Brand Positioning</label>
-                    <select id="positioning">
-                        <option value="professional">Professional</option>
-                        <option value="friendly">Friendly</option>
-                        <option value="innovative">Innovative</option>
-                        <option value="trustworthy">Trustworthy</option>
-                        <option value="playful">Playful</option>
-                        <option value="luxury">Luxury</option>
-                    </select>
-                </div>
+  /* Primary Colors */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #dbeafe;
 
-                <div class="form-group">
-                    <label for="fontScale">Typography Scale</label>
-                    <select id="fontScale">
-                        <option value="1.2">Minor Third (1.2)</option>
-                        <option value="1.25" selected>Major Third (1.25)</option>
-                        <option value="1.333">Perfect Fourth (1.333)</option>
-                        <option value="1.5">Perfect Fifth (1.5)</option>
-                        <option value="1.618">Golden Ratio (1.618)</option>
-                    </select>
-                </div>
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 
-                <div class="form-group">
-                    <label for="coreColor">Core Color</label>
-                    <div class="color-input-group">
-                        <input type="color" id="coreColor" value="#3b82f6">
-                        <input type="text" id="coreColorText" value="#3b82f6" placeholder="Core Color">
-                        <button class="generate-colors-btn" id="generateColorsBtn">Generate Palette</button>
-                    </div>
-                </div>
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-                <div class="form-group">
-                    <label for="coreFont">Core Typography</label>
-                    <select id="coreFont">
-                        <option value="Inter">Inter</option>
-                        <option value="Roboto">Roboto</option>
-                        <option value="Open Sans">Open Sans</option>
-                        <option value="Poppins">Poppins</option>
-                        <option value="Montserrat">Montserrat</option>
-                        <option value="Playfair Display">Playfair Display</option>
-                        <option value="Lora">Lora</option>
-                        <option value="Source Sans Pro">Source Sans Pro</option>
-                    </select>
-                    <button class="generate-typography-btn" id="generateTypographyBtn">Generate Pair</button>
-                </div>
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 
-                <div class="form-group">
-                    <label>Generated Colors</label>
-                    <div class="color-inputs">
-                        <div class="color-input-group">
-                            <input type="color" id="primaryColor" value="#3b82f6">
-                            <input type="text" id="primaryColorText" value="#3b82f6" placeholder="Primary">
-                        </div>
-                        <div class="color-input-group">
-                            <input type="color" id="secondaryColor" value="#64748b">
-                            <input type="text" id="secondaryColorText" value="#64748b" placeholder="Secondary">
-                        </div>
-                        <div class="color-input-group">
-                            <input type="color" id="accentColor" value="#10b981">
-                            <input type="text" id="accentColorText" value="#10b981" placeholder="Accent">
-                        </div>
-                        <div class="color-input-group">
-                            <input type="color" id="textColor" value="#1f2937">
-                            <input type="text" id="textColorText" value="#1f2937" placeholder="Text">
-                        </div>
-                    </div>
-                    <div class="accessibility-warning" id="accessibilityWarning">
-                        ⚠️ Color contrast may not meet WCAG AA standards
-                    </div>
-                    <div class="accessibility-success" id="accessibilitySuccess">
-                        ✅ Color contrast meets WCAG AA standards
-                    </div>
-                </div>
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
 
-                <button class="generate-btn" id="generateBtn">Generate Style Guide</button>
+  /* Typography */
+  --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
 
-                <div class="recommendations" id="recommendations">
-                    <h4>Smart Recommendations</h4>
-                    <p id="recommendationText">Select your core color and typography to get personalized recommendations.</p>
-                </div>
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
 
-                <div class="breakdown-section" id="breakdownSection" style="display: none;">
-                    <h4>Style Guide Breakdown</h4>
-                    <div id="breakdownContent">
-                        <!-- Breakdown content will be generated here -->
-                    </div>
-                </div>
-            </div>
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-grey-900);
+  background-color: var(--color-grey-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-            <div class="preview-section">
-                <div class="preview-header">
-                    <h2>Preview</h2>
-                    <div class="export-buttons">
-                        <button class="export-btn" id="copyCssBtn">Copy CSS</button>
-                        <button class="export-btn" id="downloadCsvBtn">Download CSV</button>
-                        <button class="export-btn" id="downloadPngBtn">Download PNG</button>
-                    </div>
-                </div>
+/* Layout */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-                <div class="preview-tabs">
-                    <button class="preview-tab active" data-tab="hero">Hero Section</button>
-                    <button class="preview-tab" data-tab="forms">Forms</button>
-                    <button class="preview-tab" data-tab="cards">Cards</button>
-                    <button class="preview-tab" data-tab="typography">Typography</button>
-                </div>
-                
-                <div class="preview-content" id="previewContent">
-                    <div class="preview-panel active" id="hero">
-                        <nav class="preview-nav">
-                            <div class="nav-logo">Brand</div>
-                            <div class="nav-links">
-                                <a href="#">Home</a>
-                                <a href="#">About</a>
-                                <a href="#">Services</a>
-                                <a href="#">Contact</a>
-                            </div>
-                        </nav>
-                        
-                        <div class="preview-hero">
-                            <div>
-                                <h1>Transform Your Business</h1>
-                                <p class="subtitle">Professional solutions for modern challenges</p>
-                                <p class="body-text">We help businesses grow with innovative strategies and cutting-edge technology. Our team of experts delivers results that matter.</p>
-                                <button class="cta-button">Get Started</button>
-                            </div>
-                            <div class="image-placeholder">
-                                Image Placeholder
-                            </div>
-                        </div>
-                    </div>
+/* Header */
+.header {
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-grey-200);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-                    <div class="preview-panel" id="forms">
-                        <div class="forms-grid">
-                            <div class="form-card">
-                                <h3>Contact Form</h3>
-                                <div class="input-group">
-                                    <label for="name">Name</label>
-                                    <input type="text" id="name" placeholder="Enter your name">
-                                </div>
-                                <div class="input-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" id="email" placeholder="Enter your email">
-                                </div>
-                                <div class="input-group">
-                                    <label for="message">Message</label>
-                                    <textarea id="message" rows="4" placeholder="Enter your message"></textarea>
-                                </div>
-                                <button class="form-button">Send Message</button>
-                            </div>
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-                            <div class="form-card">
-                                <h3>Preferences</h3>
-                                <div class="input-group">
-                                    <label for="category">Category</label>
-                                    <select id="category">
-                                        <option>Select a category</option>
-                                        <option>Option 1</option>
-                                        <option>Option 2</option>
-                                    </select>
-                                </div>
-                                <div class="checkbox-group">
-                                    <input type="checkbox" id="newsletter">
-                                    <label for="newsletter">Subscribe to newsletter</label>
-                                </div>
-                                <div class="radio-group">
-                                    <div class="radio-item">
-                                        <input type="radio" id="option1" name="options">
-                                        <label for="option1">Option 1</label>
-                                    </div>
-                                    <div class="radio-item">
-                                        <input type="radio" id="option2" name="options">
-                                        <label for="option2">Option 2</label>
-                                    </div>
-                                </div>
-                                <button class="form-button">Save Preferences</button>
-                            </div>
-                        </div>
-                    </div>
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
 
-                    <div class="preview-panel" id="cards">
-                        <div class="cards-grid">
-                            <div class="preview-card">
-                                <h3>Basic Plan</h3>
-                                <div class="price">$29<span style="font-size: 1rem; font-weight: 400;">/month</span></div>
-                                <ul>
-                                    <li>5 Projects</li>
-                                    <li>10GB Storage</li>
-                                    <li>Email Support</li>
-                                    <li>Basic Analytics</li>
-                                </ul>
-                                <button class="card-button">Choose Plan</button>
-                            </div>
+.app-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-grey-900);
+  letter-spacing: -0.025em;
+}
 
-                            <div class="preview-card">
-                                <h3>Pro Plan</h3>
-                                <div class="price">$59<span style="font-size: 1rem; font-weight: 400;">/month</span></div>
-                                <ul>
-                                    <li>20 Projects</li>
-                                    <li>100GB Storage</li>
-                                    <li>Priority Support</li>
-                                    <li>Advanced Analytics</li>
-                                    <li>Team Collaboration</li>
-                                </ul>
-                                <button class="card-button">Choose Plan</button>
-                            </div>
+.app-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-grey-600);
+  font-weight: 400;
+}
 
-                            <div class="preview-card">
-                                <h3>Enterprise</h3>
-                                <div class="price">$99<span style="font-size: 1rem; font-weight: 400;">/month</span></div>
-                                <ul>
-                                    <li>Unlimited Projects</li>
-                                    <li>1TB Storage</li>
-                                    <li>24/7 Phone Support</li>
-                                    <li>Custom Analytics</li>
-                                    <li>API Access</li>
-                                    <li>Custom Integrations</li>
-                                </ul>
-                                <button class="card-button">Contact Sales</button>
-                            </div>
-                        </div>
-                    </div>
+.header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
 
-                    <div class="preview-panel" id="typography">
-                        <div class="typography-showcase">
-                            <h1>Heading 1 - Main Title</h1>
-                            <h2>Heading 2 - Section Title</h2>
-                            <h3>Heading 3 - Subsection</h3>
-                            <h4>Heading 4 - Minor Heading</h4>
-                            
-                            <p class="lead">This is a lead paragraph that introduces important content with slightly larger text and better visual hierarchy.</p>
-                            
-                            <p>This is regular body text that should be comfortable to read at length. The line height and font size are optimized for readability across different devices and screen sizes.</p>
-                            
-                            <p>Another paragraph to demonstrate proper spacing and flow. Good typography creates rhythm and helps guide the reader through your content naturally.</p>
-                            
-                            <p class="small">This is small text, often used for captions, footnotes, or secondary information that supports the main content.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
 
-    <footer class="footer">
-        <p>Copyright © <span id="currentYear"></span> • Designed with ❤️ by <a href="https://dee7studio.com" target="_blank">Dee7 Studio</a></p>
-    </footer>
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-    <script src="js/generators.js"></script>
-    <script src="js/export.js"></script>
-    <script src="js/app.js"></script>
-</body>
-</html>
+.btn-primary {
+  background: var(--color-grey-900);
+  color: var(--color-white);
+  border-color: var(--color-grey-900);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-grey-800);
+  border-color: var(--color-grey-800);
+}
+
+.btn-secondary {
+  background: var(--color-white);
+  color: var(--color-grey-700);
+  border-color: var(--color-grey-300);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-grey-50);
+  border-color: var(--color-grey-400);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-grey-600);
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-grey-100);
+  color: var(--color-grey-700);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+}
+
+/* Controls Panel */
+.controls-panel {
+  position: sticky;
+  top: calc(80px + var(--spacing-xl));
+}
+
+.panel-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.control-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal);
+}
+
+.control-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-grey-900);
+  margin-bottom: var(--spacing-md);
+}
+
+.card-title svg {
+  color: var(--color-grey-600);
+}
+
+/* Logo Upload */
+.logo-upload-area {
+  border: 2px dashed var(--color-grey-300);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  background: var(--color-grey-50);
+}
+
+.logo-upload-area:hover {
+  border-color: var(--color-grey-400);
+  background: var(--color-grey-100);
+}
+
+.logo-upload-area.dragover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.upload-content svg {
+  color: var(--color-grey-400);
+  margin-bottom: var(--spacing-sm);
+}
+
+.upload-text {
+  font-weight: 500;
+  color: var(--color-grey-700);
+  margin-bottom: 0.25rem;
+}
+
+.upload-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-grey-500);
+}
+
+.logo-preview {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-white);
+  border: 1px solid var(--color-grey-200);
+}
+
+.logo-preview img {
+  width: 100%;
+  height: 120px;
+  object-fit: contain;
+  background: var(--color-grey-50);
+}
+
+.remove-logo {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-grey-900);
+  color: var(--color-white);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  transition: background var(--transition-fast);
+}
+
+.remove-logo:hover {
+  background: var(--color-grey-800);
+}
+
+/* Radio Options */
+.harmony-options,
+.typography-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.radio-option:hover {
+  background: var(--color-grey-50);
+}
+
+.radio-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.radio-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-grey-700);
+}
+
+/* Color Input */
+.color-input-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.color-picker {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--color-grey-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: none;
+}
+
+.color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker::-webkit-color-swatch {
+  border: none;
+  border-radius: calc(var(--radius-md) - 2px);
+}
+
+.color-hex {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-grey-300);
+  border-radius: var(--radius-md);
+  font-family: "Monaco", "Menlo", monospace;
+  font-size: var(--font-size-sm);
+  background: var(--color-white);
+  transition: border-color var(--transition-fast);
+}
+
+.color-hex:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Preview Section */
+.preview-section {
+  min-height: 600px;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.preview-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--color-grey-900);
+}
+
+.preview-container {
+  background: var(--color-white);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  min-height: 600px;
+  overflow: hidden;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-grey-200);
+}
+
+.modal-header h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-grey-900);
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-grey-100);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--color-grey-600);
+  transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+  background: var(--color-grey-200);
+  color: var(--color-grey-800);
+}
+
+.modal-content {
+  padding: var(--spacing-lg);
+}
+
+.modal-footer {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-grey-200);
+  background: var(--color-grey-50);
+}
+
+/* Export Options */
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.checkbox-option:hover {
+  background: var(--color-grey-50);
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.checkbox-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-grey-700);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .controls-panel {
+    position: static;
+  }
+
+  .panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+
+  .main-content {
+    padding: var(--spacing-md);
+  }
+
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    width: 95%;
+    margin: var(--spacing-md);
+  }
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--color-grey-300);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-normal) ease-out;
+}
