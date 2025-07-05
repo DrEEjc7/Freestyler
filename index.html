@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style Guide Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/preview.css">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Style Guide Generator</div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <span id="themeIcon">🌙</span>
+            <span id="themeText">Dark</span>
+        </button>
+    </header>
+
+    <main class="main-content">
+        <div class="tool-container">
+            <div class="form-section">
+                <h2>Settings</h2>
+                
+                <div class="form-group">
+                    <label for="industry">Industry</label>
+                    <select id="industry">
+                        <option value="tech">Technology</option>
+                        <option value="finance">Finance</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="creative">Creative</option>
+                        <option value="legal">Legal</option>
+                        <option value="ecommerce">E-commerce</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="positioning">Brand Positioning</label>
+                    <select id="positioning">
+                        <option value="professional">Professional</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="innovative">Innovative</option>
+                        <option value="trustworthy">Trustworthy</option>
+                        <option value="playful">Playful</option>
+                        <option value="luxury">Luxury</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fontScale">Typography Scale</label>
+                    <select id="fontScale">
+                        <option value="1.2">Minor Third (1.2)</option>
+                        <option value="1.25" selected>Major Third (1.25)</option>
+                        <option value="1.333">Perfect Fourth (1.333)</option>
+                        <option value="1.5">Perfect Fifth (1.5)</option>
+                        <option value="1.618">Golden Ratio (1.618)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="coreColor">Core Color</label>
+                    <div class="color-input-group">
+                        <input type="color" id="coreColor" value="#3b82f6">
+                        <input type="text" id="coreColorText" value="#3b82f6" placeholder="Core Color">
+                        <button class="generate-colors-btn" id="generateColorsBtn">Generate Palette</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="coreFont">Core Typography</label>
+                    <select id="coreFont">
+                        <option value="Inter">Inter</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Lora">Lora</option>
+                        <option value="Source Sans Pro">Source Sans Pro</option>
+                    </select>
+                    <button class="generate-typography-btn" id="generateTypographyBtn">Generate Pair</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Generated Colors</label>
+                    <div class="color-inputs">
+                        <div class="color-input-group">
+                            <input type="color" id="primaryColor" value="#3b82f6">
+                            <input type="text" id="primaryColorText" value="#3b82f6" placeholder="Primary">
+                        </div>
+                        <div class="color-input-group">
+                            <input type="color" id="secondaryColor" value="#64748b">
+                            <input type="text" id="secondaryColorText" value="#64748b" placeholder="Secondary">
+                        </div>
+                        <div class="color-input-group">
+                            <input type="color" id="accentColor" value="#10b981">
+                            <input type="text" id="accentColorText" value="#10b981" placeholder="Accent">
+                        </div>
+                        <div class="color-input-group">
+                            <input type="color" id="textColor" value="#1f2937">
+                            <input type="text" id="textColorText" value="#1f2937" placeholder="Text">
+                        </div>
+                    </div>
+                    <div class="accessibility-warning" id="accessibilityWarning">
+                        ⚠️ Color contrast may not meet WCAG AA standards
+                    </div>
+                    <div class="accessibility-success" id="accessibilitySuccess">
+                        ✅ Color contrast meets WCAG AA standards
+                    </div>
+                </div>
+
+                <button class="generate-btn" id="generateBtn">Generate Style Guide</button>
+
+                <div class="recommendations" id="recommendations">
+                    <h4>Smart Recommendations</h4>
+                    <p id="recommendationText">Select your core color and typography to get personalized recommendations.</p>
+                </div>
+
+                <div class="breakdown-section" id="breakdownSection" style="display: none;">
+                    <h4>Style Guide Breakdown</h4>
+                    <div id="breakdownContent">
+                        <!-- Breakdown content will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h2>Preview</h2>
+                    <div class="export-buttons">
+                        <button class="export-btn" id="copyCssBtn">Copy CSS</button>
+                        <button class="export-btn" id="downloadCsvBtn">Download CSV</button>
+                        <button class="export-btn" id="downloadPngBtn">Download PNG</button>
+                    </div>
+                </div>
+
+                <div class="preview-tabs">
+                    <button class="preview-tab active" data-tab="hero">Hero Section</button>
+                    <button class="preview-tab" data-tab="forms">Forms</button>
+                    <button class="preview-tab" data-tab="cards">Cards</button>
+                    <button class="preview-tab" data-tab="typography">Typography</button>
+                </div>
+                
+                <div class="preview-content" id="previewContent">
+                    <div class="preview-panel active" id="hero">
+                        <nav class="preview-nav">
+                            <div class="nav-logo">Brand</div>
+                            <div class="nav-links">
+                                <a href="#">Home</a>
+                                <a href="#">About</a>
+                                <a href="#">Services</a>
+                                <a href="#">Contact</a>
+                            </div>
+                        </nav>
+                        
+                        <div class="preview-hero">
+                            <div>
+                                <h1>Transform Your Business</h1>
+                                <p class="subtitle">Professional solutions for modern challenges</p>
+                                <p class="body-text">We help businesses grow with innovative strategies and cutting-edge technology. Our team of experts delivers results that matter.</p>
+                                <button class="cta-button">Get Started</button>
+                            </div>
+                            <div class="image-placeholder">
+                                Image Placeholder
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-panel" id="forms">
+                        <div class="forms-grid">
+                            <div class="form-card">
+                                <h3>Contact Form</h3>
+                                <div class="input-group">
+                                    <label for="name">Name</label>
+                                    <input type="text" id="name" placeholder="Enter your name">
+                                </div>
+                                <div class="input-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" placeholder="Enter your email">
+                                </div>
+                                <div class="input-group">
+                                    <label for="message">Message</label>
+                                    <textarea id="message" rows="4" placeholder="Enter your message"></textarea>
+                                </div>
+                                <button class="form-button">Send Message</button>
+                            </div>
+
+                            <div class="form-card">
+                                <h3>Preferences</h3>
+                                <div class="input-group">
+                                    <label for="category">Category</label>
+                                    <select id="category">
+                                        <option>Select a category</option>
+                                        <option>Option 1</option>
+                                        <option>Option 2</option>
+                                    </select>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="newsletter">
+                                    <label for="newsletter">Subscribe to newsletter</label>
+                                </div>
+                                <div class="radio-group">
+                                    <div class="radio-item">
+                                        <input type="radio" id="option1" name="options">
+                                        <label for="option1">Option 1</label>
+                                    </div>
+                                    <div class="radio-item">
+                                        <input type="radio" id="option2" name="options">
+                                        <label for="option2">Option 2</label>
+                                    </div>
+                                </div>
+                                <button class="form-button">Save Preferences</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-panel" id="cards">
+                        <div class="cards-grid">
+                            <div class="preview-card">
+                                <h3>Basic Plan</h3>
+                                <div class="price">$29<span style="font-size: 1rem; font-weight: 400;">/month</span></div>
+                                <ul>
+                                    <li>5 Projects</li>
+                                    <li>10GB Storage</li>
+                                    <li>Email Support</li>
+                                    <li>Basic Analytics</li>
+                                </ul>
+                                <button class="card-button">Choose Plan</button>
+                            </div>
+
+                            <div class="preview-card">
+                                <h3>Pro Plan</h3>
+                                <div class="price">$59<span style="font-size: 1rem; font-weight: 400;">/month</span></div>
+                                <ul>
+                                    <li>20 Projects</li>
+                                    <li>100GB Storage</li>
+                                    <li>Priority Support</li>
+                                    <li>Advanced Analytics</li>
+                                    <li>Team Collaboration</li>
+                                </ul>
+                                <button class="card-button">Choose Plan</button>
+                            </div>
+
+                            <div class="preview-card">
+                                <h3>Enterprise</h3>
+                                <div class="price">$99<span style="font-size: 1rem; font-weight: 400;">/month</span></div>
+                                <ul>
+                                    <li>Unlimited Projects</li>
+                                    <li>1TB Storage</li>
+                                    <li>24/7 Phone Support</li>
+                                    <li>Custom Analytics</li>
+                                    <li>API Access</li>
+                                    <li>Custom Integrations</li>
+                                </ul>
+                                <button class="card-button">Contact Sales</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-panel" id="typography">
+                        <div class="typography-showcase">
+                            <h1>Heading 1 - Main Title</h1>
+                            <h2>Heading 2 - Section Title</h2>
+                            <h3>Heading 3 - Subsection</h3>
+                            <h4>Heading 4 - Minor Heading</h4>
+                            
+                            <p class="lead">This is a lead paragraph that introduces important content with slightly larger text and better visual hierarchy.</p>
+                            
+                            <p>This is regular body text that should be comfortable to read at length. The line height and font size are optimized for readability across different devices and screen sizes.</p>
+                            
+                            <p>Another paragraph to demonstrate proper spacing and flow. Good typography creates rhythm and helps guide the reader through your content naturally.</p>
+                            
+                            <p class="small">This is small text, often used for captions, footnotes, or secondary information that supports the main content.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Copyright © <span id="currentYear"></span> • Designed with ❤️ by <a href="https://dee7studio.com" target="_blank">Dee7 Studio</a></p>
+    </footer>
+
+    <script src="js/generators.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
