@@ -18,11 +18,31 @@ function updateColorInput(colorId, textId, value, key) {
   const colorInput = document.getElementById(colorId)
   const textInput = document.getElementById(textId)
   
+  // Validate hex color format
+  if (!isValidHex(value)) {
+    console.warn(`Invalid hex color: ${value}`)
+    return
+  }
+  
   if (colorInput) colorInput.value = value
   if (textInput) textInput.value = value
   
   AppState.currentColors[key] = value
-  updateColorHarmony(value, colorId.replace("Color", ""))
+  
+  // Update harmony visualization
+  const harmonyKey = colorId.replace("Color", "").replace("core", "primary")
+  updateColorHarmony(value, harmonyKey)
+  
+  // Update accessibility score
+  updateAccessibilityScore()
+  
+  // Update preview in real-time
+  updatePreviewInRealTime()
+}
+
+// Add this helper function if it doesn't exist:
+function isValidHex(hex) {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex)
 }
 
 function showAIBadges() {
@@ -117,19 +137,110 @@ function generateIntelligentTypographyPair(industry, positioning) {
     tech: {
       professional: { heading: "Inter", body: "Inter" },
       innovative: { heading: "Poppins", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" }
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      trustworthy: { heading: "Inter", body: "Inter" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      luxury: { heading: "Playfair Display", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Inter" }
     },
     finance: {
       professional: { heading: "Playfair Display", body: "Inter" },
       trustworthy: { heading: "Lora", body: "Inter" },
-      luxury: { heading: "Playfair Display", body: "Lora" }
+      luxury: { heading: "Playfair Display", body: "Lora" },
+      innovative: { heading: "Montserrat", body: "Inter" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      playful: { heading: "Poppins", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Roboto" }
+    },
+    healthcare: {
+      professional: { heading: "Inter", body: "Inter" },
+      trustworthy: { heading: "Source Sans Pro", body: "Source Sans Pro" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      innovative: { heading: "Poppins", body: "Inter" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      luxury: { heading: "Lora", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Inter" }
     },
     creative: {
       playful: { heading: "Poppins", body: "Open Sans" },
       innovative: { heading: "Montserrat", body: "Inter" },
-      luxury: { heading: "Playfair Display", body: "Lora" }
+      luxury: { heading: "Playfair Display", body: "Lora" },
+      professional: { heading: "Montserrat", body: "Inter" },
+      trustworthy: { heading: "Lora", body: "Inter" },
+      friendly: { heading: "Poppins", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Roboto" }
+    },
+    legal: {
+      professional: { heading: "Playfair Display", body: "Lora" },
+      trustworthy: { heading: "Lora", body: "Source Sans Pro" },
+      luxury: { heading: "Playfair Display", body: "Inter" },
+      innovative: { heading: "Montserrat", body: "Inter" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      playful: { heading: "Poppins", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Roboto" }
+    },
+    ecommerce: {
+      friendly: { heading: "Montserrat", body: "Open Sans" },
+      luxury: { heading: "Playfair Display", body: "Lora" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      professional: { heading: "Inter", body: "Inter" },
+      trustworthy: { heading: "Lora", body: "Inter" },
+      innovative: { heading: "Montserrat", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Roboto" }
+    },
+    consulting: {
+      professional: { heading: "Playfair Display", body: "Inter" },
+      trustworthy: { heading: "Lora", body: "Inter" },
+      luxury: { heading: "Playfair Display", body: "Lora" },
+      innovative: { heading: "Montserrat", body: "Inter" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      playful: { heading: "Poppins", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Roboto" }
+    },
+    education: {
+      professional: { heading: "Lora", body: "Inter" },
+      trustworthy: { heading: "Source Sans Pro", body: "Source Sans Pro" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      innovative: { heading: "Poppins", body: "Inter" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      luxury: { heading: "Playfair Display", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Inter" }
+    },
+    nonprofit: {
+      trustworthy: { heading: "Lora", body: "Inter" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      professional: { heading: "Source Sans Pro", body: "Source Sans Pro" },
+      innovative: { heading: "Poppins", body: "Inter" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      luxury: { heading: "Playfair Display", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Inter" }
     }
   }
+  
+  // Get the specific pair or fallback to a safe default
+  const industryPairs = pairs[industry]
+  if (!industryPairs) {
+    return { heading: "Inter", body: "Inter" }
+  }
+  
+  const selectedPair = industryPairs[positioning]
+  if (!selectedPair) {
+    // Fallback to the first available pair for the industry
+    const firstKey = Object.keys(industryPairs)[0]
+    return industryPairs[firstKey] || { heading: "Inter", body: "Inter" }
+  }
+  
+  return selectedPair
+}
   
   return pairs[industry]?.[positioning] || { heading: "Inter", body: "Inter" }
 }
@@ -1180,48 +1291,62 @@ function performLogoAnalysis(imageElement) {
 
 function analyzeImageColors(imageData) {
   const colorCounts = {}
-  const sampleRate = 40 // Sample every 40th pixel for performance
+  const sampleRate = 20 // Reduced sample rate for better performance
+  const minAlpha = 100 // Minimum alpha threshold
+  const minSaturation = 10 // Minimum saturation for color consideration
 
-  for (let i = 0; i < imageData.length; i += sampleRate) {
+  // Sample pixels efficiently
+  for (let i = 0; i < imageData.length; i += (sampleRate * 4)) {
     const r = imageData[i]
     const g = imageData[i + 1]
     const b = imageData[i + 2]
     const a = imageData[i + 3]
 
-    // Skip transparent or very light pixels
-    if (a < 128 || (r > 240 && g > 240 && b > 240)) continue
+    // Skip transparent, very light, or white pixels
+    if (a < minAlpha || (r > 245 && g > 245 && b > 245)) continue
 
     const hex = rgbToHex(r, g, b)
     const [h, s, l] = hexToHsl(hex)
 
     // Only consider colors with some saturation or very dark colors
-    if (s > 15 || l < 25) {
-      // Cluster similar colors
+    if (s > minSaturation || l < 20) {
+      // Cluster similar colors to reduce noise
       const clusteredHex = clusterColor(hex)
       colorCounts[clusteredHex] = (colorCounts[clusteredHex] || 0) + 1
     }
   }
 
+  // Sort colors by frequency and take top candidates
   const sortedColors = Object.entries(colorCounts)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 8)
+    .slice(0, 6)
     .map(([color]) => color)
+    .filter(color => color !== '#000000') // Filter out pure black unless it's very dominant
+
+  // Ensure we have at least one color
+  if (sortedColors.length === 0) {
+    sortedColors.push('#000000')
+  }
 
   return {
     dominantColors: sortedColors,
     primaryColor: sortedColors[0] || "#000000",
     colorCount: sortedColors.length,
-    isComplex: sortedColors.length > 3
+    isComplex: sortedColors.length > 3,
+    hasStrongBrand: sortedColors.length >= 2 && colorCounts[sortedColors[0]] > 100
   }
 }
 
+// Improve the clusterColor function:
 function clusterColor(hex) {
   const [h, s, l] = hexToHsl(hex)
-  // Cluster to nearest 15 degree hue, 20% saturation, 10% lightness
-  const clusteredH = Math.round(h / 15) * 15
-  const clusteredS = Math.round(s / 20) * 20
-  const clusteredL = Math.round(l / 10) * 10
-  return hslToHex(clusteredH, clusteredS, clusteredL)
+  
+  // More precise clustering for better color detection
+  const clusteredH = Math.round(h / 20) * 20 // 20-degree clusters
+  const clusteredS = Math.round(s / 25) * 25 // 25% saturation clusters  
+  const clusteredL = Math.round(l / 15) * 15 // 15% lightness clusters
+  
+  return hslToHex(clusteredH % 360, Math.min(clusteredS, 100), Math.min(clusteredL, 100))
 }
 
 function applyLogoColors(analysis) {
