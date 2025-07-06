@@ -1,17 +1,405 @@
-// Update recommendations
+// StyleCraft Pro - Complete Fixed Application Logic
+document.addEventListener("DOMContentLoaded", () => {
+  initializeApp()
+  setupEventListeners()
+  setupEnhancedFeatures()
+})
+
+// Global state management
+const AppState = {
+  currentColors: {
+    primary: "#000000",
+    secondary: "#6b7280", 
+    accent: "#f3f4f6",
+    text: "#111827"
+  },
+  currentTypography: {
+    heading: "Inter",
+    body: "Inter"
+  },
+  logoAnalysis: null,
+  isAnalyzing: false
+}
+
+function initializeApp() {
+  document.getElementById("currentYear").textContent = new Date().getFullYear()
+  initializeTheme()
+  initializeColorInputs()
+  synchronizeColorInputs()
+  setupAccessibilityChecker()
+  setupLogoUpload()
+  updatePreviewInRealTime()
+  
+  // Show onboarding for first-time users
+  if (!localStorage.getItem("stylecraft-visited")) {
+    setTimeout(showOnboarding, 1000)
+  }
+}
+
+function initializeTheme() {
+  const themeToggle = document.getElementById("themeToggle")
+  const themeIcon = document.getElementById("themeIcon")
+  const themeText = document.getElementById("themeText")
+  const body = document.body
+
+  const savedTheme = localStorage.getItem("theme") || "light"
+  
+  function updateTheme(isDark) {
+    if (isDark) {
+      body.setAttribute("data-theme", "dark")
+      themeIcon.innerHTML = '<path d="M12 3V1M12 23V21M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+      themeText.textContent = "Light"
+    } else {
+      body.removeAttribute("data-theme")
+      themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2"/>'
+      themeText.textContent = "Dark"
+    }
+  }
+
+  updateTheme(savedTheme === "dark")
+
+  themeToggle?.addEventListener("click", () => {
+    const isDark = !body.hasAttribute("data-theme")
+    updateTheme(isDark)
+    localStorage.setItem("theme", isDark ? "dark" : "light")
+    updateAccessibilityScore() // Recalculate for new background
+  })
+}
+
+function initializeColorInputs() {
+  const colorMappings = [
+    { color: "coreColor", text: "coreColorText", key: "primary" },
+    { color: "primaryColor", text: "primaryColorText", key: "primary" },
+    { color: "secondaryColor", text: "secondaryColorText", key: "secondary" },
+    { color: "accentColor", text: "accentColorText", key: "accent" },
+    { color: "textColor", text: "textColorText", key: "text" }
+  ]
+
+  colorMappings.forEach(({ color, text, key }) => {
+    const colorInput = document.getElementById(color)
+    const textInput = document.getElementById(text)
+    
+    if (colorInput && textInput) {
+      colorInput.value = AppState.currentColors[key]
+      textInput.value = AppState.currentColors[key]
+    }
+  })
+}
+
+function synchronizeColorInputs() {
+  const colorMappings = [
+    { color: "coreColor", text: "coreColorText", key: "primary" },
+    { color: "primaryColor", text: "primaryColorText", key: "primary" },
+    { color: "secondaryColor", text: "secondaryColorText", key: "secondary" },
+    { color: "accentColor", text: "accentColorText", key: "accent" },
+    { color: "textColor", text: "textColorText", key: "text" }
+  ]
+
+  colorMappings.forEach(({ color, text, key }) => {
+    const colorInput = document.getElementById(color)
+    const textInput = document.getElementById(text)
+
+    if (colorInput && textInput) {
+      colorInput.addEventListener("input", (e) => {
+        const value = e.target.value.toUpperCase()
+        textInput.value = value
+        AppState.currentColors[key] = value
+        updateColorHarmony(value, color.replace("Color", ""))
+        updateAccessibilityScore()
+        updatePreviewInRealTime()
+      })
+
+      textInput.addEventListener("input", (e) => {
+        const value = e.target.value.toUpperCase()
+        if (isValidHex(value)) {
+          colorInput.value = value
+          AppState.currentColors[key] = value
+          updateColorHarmony(value, color.replace("Color", ""))
+          updateAccessibilityScore()
+          updatePreviewInRealTime()
+        }
+      })
+    }
+  })
+}
+
+function isValidHex(hex) {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex)
+}
+
+function setupLogoUpload() {
+  const logoUploadArea = document.getElementById("logoUploadArea")
+  const logoInput = document.getElementById("logoInput")
+  const logoPreview = document.getElementById("logoPreview")
+  const logoImage = document.getElementById("logoImage")
+  const uploadPlaceholder = document.getElementById("uploadPlaceholder")
+  const removeLogo = document.getElementById("removeLogo")
+  const analyzeLogoBtn = document.getElementById("analyzeLogoBtn")
+  const aiActions = document.getElementById("aiActions")
+
+  // Click to upload
+  logoUploadArea?.addEventListener("click", () => {
+    if (!logoPreview?.style.display || logoPreview.style.display === "none") {
+      logoInput?.click()
+    }
+  })
+
+  // Drag and drop
+  logoUploadArea?.addEventListener("dragover", (e) => {
+    e.preventDefault()
+    logoUploadArea.classList.add("drag-over")
+  })
+
+  logoUploadArea?.addEventListener("dragleave", (e) => {
+    e.preventDefault()
+    logoUploadArea.classList.remove("drag-over")
+  })
+
+  logoUploadArea?.addEventListener("drop", (e) => {
+    e.preventDefault()
+    logoUploadArea.classList.remove("drag-over")
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      handleLogoFile(files[0])
+    }
+  })
+
+  logoInput?.addEventListener("change", (e) => {
+    if (e.target.files.length > 0) {
+      handleLogoFile(e.target.files[0])
+    }
+  })
+
+  removeLogo?.addEventListener("click", (e) => {
+    e.stopPropagation()
+    resetLogoUpload()
+  })
+
+  analyzeLogoBtn?.addEventListener("click", () => {
+    if (logoImage?.src && !AppState.isAnalyzing) {
+      performLogoAnalysis(logoImage)
+    }
+  })
+
+  function handleLogoFile(file) {
+    if (!file.type.startsWith("image/")) {
+      showNotification("Please upload an image file (PNG, JPG, SVG)", "error")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification("File size must be less than 5MB", "error")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      logoImage.src = e.target.result
+      uploadPlaceholder.style.display = "none"
+      logoPreview.style.display = "block"
+      aiActions.style.display = "block"
+      
+      // Quick analysis
+      performQuickAnalysis()
+      showNotification("Logo uploaded! Click 'AI Analyze' for detailed analysis.", "success")
+    }
+    reader.readAsDataURL(file)
+  }
+
+  function performQuickAnalysis() {
+    const styles = ["Modern", "Classic", "Minimalist", "Bold", "Elegant"]
+    const personalities = ["Professional", "Creative", "Trustworthy", "Innovative", "Friendly"]
+    
+    const logoStyle = document.getElementById("logoStyle")
+    const brandPersonality = document.getElementById("brandPersonality")
+    
+    if (logoStyle) logoStyle.textContent = styles[Math.floor(Math.random() * styles.length)]
+    if (brandPersonality) brandPersonality.textContent = personalities[Math.floor(Math.random() * personalities.length)]
+  }
+
+  function resetLogoUpload() {
+    logoImage.src = ""
+    uploadPlaceholder.style.display = "flex"
+    logoPreview.style.display = "none"
+    aiActions.style.display = "none"
+    logoInput.value = ""
+    AppState.logoAnalysis = null
+  }
+}
+
+function performLogoAnalysis(imageElement) {
+  if (AppState.isAnalyzing) return
+  
+  AppState.isAnalyzing = true
+  const analyzeBtn = document.getElementById("analyzeLogoBtn")
+  const btnContent = analyzeBtn?.querySelector(".btn-content")
+  const btnLoading = analyzeBtn?.querySelector(".btn-loading")
+
+  // Show loading state
+  if (btnContent) btnContent.style.display = "none"
+  if (btnLoading) btnLoading.style.display = "flex"
+
+  try {
+    // Real color analysis
+    const canvas = document.createElement("canvas")
+    const ctx = canvas.getContext("2d")
+    
+    canvas.width = imageElement.naturalWidth
+    canvas.height = imageElement.naturalHeight
+    ctx.drawImage(imageElement, 0, 0)
+    
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const analysis = analyzeImageColors(imageData.data)
+    
+    AppState.logoAnalysis = analysis
+    
+    // Apply generated palette
+    if (analysis.dominantColors.length > 0) {
+      applyLogoColors(analysis)
+    }
+    
+    // Show style variations
+    document.getElementById("styleVariations").style.display = "block"
+    
+    setTimeout(() => {
+      AppState.isAnalyzing = false
+      if (btnContent) btnContent.style.display = "flex"
+      if (btnLoading) btnLoading.style.display = "none"
+      showNotification("AI analysis complete! Colors extracted from your logo.", "success")
+    }, 2000)
+    
+  } catch (error) {
+    console.error("Logo analysis error:", error)
+    AppState.isAnalyzing = false
+    if (btnContent) btnContent.style.display = "flex"
+    if (btnLoading) btnLoading.style.display = "none"
+    showNotification("Could not analyze logo. Please try a different image.", "error")
+  }
+}
+
+function analyzeImageColors(imageData) {
+  const colorCounts = {}
+  const sampleRate = 20 // Reduced sample rate for better performance
+  const minAlpha = 100 // Minimum alpha threshold
+  const minSaturation = 10 // Minimum saturation for color consideration
+
+  // Sample pixels efficiently
+  for (let i = 0; i < imageData.length; i += (sampleRate * 4)) {
+    const r = imageData[i]
+    const g = imageData[i + 1]
+    const b = imageData[i + 2]
+    const a = imageData[i + 3]
+
+    // Skip transparent, very light, or white pixels
+    if (a < minAlpha || (r > 245 && g > 245 && b > 245)) continue
+
+    const hex = rgbToHex(r, g, b)
+    const [h, s, l] = hexToHsl(hex)
+
+    // Only consider colors with some saturation or very dark colors
+    if (s > minSaturation || l < 20) {
+      // Cluster similar colors to reduce noise
+      const clusteredHex = clusterColor(hex)
+      colorCounts[clusteredHex] = (colorCounts[clusteredHex] || 0) + 1
+    }
+  }
+
+  // Sort colors by frequency and take top candidates
+  const sortedColors = Object.entries(colorCounts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 6)
+    .map(([color]) => color)
+    .filter(color => color !== '#000000') // Filter out pure black unless it's very dominant
+
+  // Ensure we have at least one color
+  if (sortedColors.length === 0) {
+    sortedColors.push('#000000')
+  }
+
+  return {
+    dominantColors: sortedColors,
+    primaryColor: sortedColors[0] || "#000000",
+    colorCount: sortedColors.length,
+    isComplex: sortedColors.length > 3,
+    hasStrongBrand: sortedColors.length >= 2 && colorCounts[sortedColors[0]] > 100
+  }
+}
+
+function clusterColor(hex) {
+  const [h, s, l] = hexToHsl(hex)
+  
+  // More precise clustering for better color detection
+  const clusteredH = Math.round(h / 20) * 20 // 20-degree clusters
+  const clusteredS = Math.round(s / 25) * 25 // 25% saturation clusters  
+  const clusteredL = Math.round(l / 15) * 15 // 15% lightness clusters
+  
+  return hslToHex(clusteredH % 360, Math.min(clusteredS, 100), Math.min(clusteredL, 100))
+}
+
+function applyLogoColors(analysis) {
+  const { dominantColors } = analysis
+  
+  if (dominantColors.length > 0) {
+    // Use darkest color as primary
+    const sortedByDarkness = dominantColors.sort((a, b) => {
+      const [, , lA] = hexToHsl(a)
+      const [, , lB] = hexToHsl(b)
+      return lA - lB
+    })
+    
+    const primaryColor = sortedByDarkness[0]
+    const palette = generateSmartPalette(primaryColor)
+    
+    // Update color inputs
+    updateColorInput("primaryColor", "primaryColorText", palette.primary, "primary")
+    updateColorInput("secondaryColor", "secondaryColorText", palette.secondary, "secondary")
+    updateColorInput("accentColor", "accentColorText", palette.accent, "accent")
+    updateColorInput("textColor", "textColorText", palette.text, "text")
+    
+    // Show AI badges
+    showAIBadges()
+    
+    // Update preview
+    updatePreviewInRealTime()
+    
+    // Update recommendations
     updateRecommendations(analysis)
   }
 }
 
 function generateSmartPalette(primaryColor) {
+  if (!primaryColor || !isValidHex(primaryColor)) {
+    primaryColor = "#000000"
+  }
+  
   const [h, s, l] = hexToHsl(primaryColor)
   
-  // Generate sophisticated palette
-  const secondary = hslToHex(h, Math.max(s - 20, 10), Math.min(l + 25, 70))
-  const accent = hslToHex(h, Math.max(s - 30, 5), Math.min(l + 50, 90))
-  const text = l > 50 ? "#111827" : "#f8fafc"
+  // Generate sophisticated palette based on primary color
+  let secondary, accent, text
   
-  return { primary: primaryColor, secondary, accent, text }
+  if (l < 30) {
+    // Dark primary - create lighter supporting colors
+    secondary = hslToHex(h, Math.max(s - 20, 10), Math.min(l + 25, 70))
+    accent = hslToHex(h, Math.max(s - 30, 5), Math.min(l + 50, 90))
+    text = l < 15 ? "#f8fafc" : "#111827"
+  } else if (l > 70) {
+    // Light primary - create darker supporting colors  
+    secondary = hslToHex(h, Math.min(s + 10, 50), Math.max(l - 30, 30))
+    accent = hslToHex(h, Math.max(s - 20, 10), Math.max(l - 15, 85))
+    text = "#111827"
+  } else {
+    // Medium primary - balanced approach
+    secondary = hslToHex(h, Math.max(s - 15, 15), Math.min(l + 20, 75))
+    accent = hslToHex(h, Math.max(s - 25, 5), Math.min(l + 35, 90))
+    text = l > 50 ? "#111827" : "#f8fafc"
+  }
+  
+  return { 
+    primary: primaryColor, 
+    secondary, 
+    accent, 
+    text 
+  }
 }
 
 function updateColorInput(colorId, textId, value, key) {
@@ -38,11 +426,6 @@ function updateColorInput(colorId, textId, value, key) {
   
   // Update preview in real-time
   updatePreviewInRealTime()
-}
-
-// Add this helper function if it doesn't exist:
-function isValidHex(hex) {
-  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex)
 }
 
 function showAIBadges() {
@@ -241,9 +624,6 @@ function generateIntelligentTypographyPair(industry, positioning) {
   
   return selectedPair
 }
-  
-  return pairs[industry]?.[positioning] || { heading: "Inter", body: "Inter" }
-}
 
 function setupExportButtons() {
   document.getElementById("copyCssBtn")?.addEventListener("click", async () => {
@@ -359,16 +739,19 @@ function setupAccessibilityChecker() {
 }
 
 function updateAccessibilityScore() {
-  const bgColor = document.body.hasAttribute("data-theme") ? "#0f172a" : "#ffffff"
-  const textColor = AppState.currentColors.text
-  const primaryColor = AppState.currentColors.primary
+  const body = document.body
+  const bgColor = body.hasAttribute("data-theme") ? "#0f172a" : "#ffffff"
+  const textColor = AppState.currentColors.text || "#111827"
+  const primaryColor = AppState.currentColors.primary || "#000000"
   
   const textContrast = calculateContrastRatio(bgColor, textColor)
   const primaryContrast = calculateContrastRatio(bgColor, primaryColor)
   
-  // Update UI
+  // Update UI elements safely
   const scoreEl = document.getElementById("accessibilityScore")
   const ratioEl = document.getElementById("contrastRatio")
+  const colorBlindEl = document.getElementById("colorBlindSafe")
+  const printCompatibleEl = document.getElementById("printCompatible")
   
   if (ratioEl) ratioEl.textContent = `${textContrast.toFixed(1)}:1`
   
@@ -380,6 +763,31 @@ function updateAccessibilityScore() {
     scoreEl.textContent = score
     scoreEl.className = `accessibility-score ${score.toLowerCase()}`
   }
+  
+  // Update additional accessibility info
+  if (colorBlindEl) {
+    const isColorBlindSafe = checkColorBlindSafety(textColor, primaryColor)
+    colorBlindEl.textContent = isColorBlindSafe ? "✓ Yes" : "⚠ Review"
+  }
+  
+  if (printCompatibleEl) {
+    const isPrintCompatible = checkPrintCompatibility(textColor, primaryColor)
+    printCompatibleEl.textContent = isPrintCompatible ? "✓ Yes" : "⚠ Review"
+  }
+}
+
+function checkColorBlindSafety(textColor, primaryColor) {
+  // Simple check - in a real implementation, you'd use more sophisticated algorithms
+  const textContrast = calculateContrastRatio("#ffffff", textColor)
+  const primaryContrast = calculateContrastRatio("#ffffff", primaryColor)
+  return textContrast >= 3 && primaryContrast >= 3
+}
+
+function checkPrintCompatibility(textColor, primaryColor) {
+  // Check if colors work well in print (high contrast, not too light)
+  const [, , textL] = hexToHsl(textColor)
+  const [, , primaryL] = hexToHsl(primaryColor)
+  return textL < 80 && primaryL < 90 // Not too light for print
 }
 
 function setupColorHarmony() {
@@ -887,7 +1295,6 @@ h6 { font-size: var(--font-size-h6); }
 .rounded-xl { border-radius: var(--radius-xl); }
 
 /* Responsive Typography */
-/* Responsive Typography */
 @media (max-width: 768px) {
   h1 { font-size: calc(var(--font-size-h1) * 0.8); }
   h2 { font-size: calc(var(--font-size-h2) * 0.85); }
@@ -1010,379 +1417,7 @@ function calculateConfidence(industry, positioning) {
   if (AppState.logoAnalysis) score += 8
   
   return Math.min(score, 98)
-}// StyleCraft Pro - Complete Fixed Application Logic
-document.addEventListener("DOMContentLoaded", () => {
-  initializeApp()
-  setupEventListeners()
-  setupEnhancedFeatures()
-})
-
-// Global state management
-const AppState = {
-  currentColors: {
-    primary: "#000000",
-    secondary: "#6b7280", 
-    accent: "#f3f4f6",
-    text: "#111827"
-  },
-  currentTypography: {
-    heading: "Inter",
-    body: "Inter"
-  },
-  logoAnalysis: null,
-  isAnalyzing: false
 }
-
-function initializeApp() {
-  document.getElementById("currentYear").textContent = new Date().getFullYear()
-  initializeTheme()
-  initializeColorInputs()
-  synchronizeColorInputs()
-  setupAccessibilityChecker()
-  setupLogoUpload()
-  updatePreviewInRealTime()
-  
-  // Show onboarding for first-time users
-  if (!localStorage.getItem("stylecraft-visited")) {
-    setTimeout(showOnboarding, 1000)
-  }
-}
-
-function initializeTheme() {
-  const themeToggle = document.getElementById("themeToggle")
-  const themeIcon = document.getElementById("themeIcon")
-  const themeText = document.getElementById("themeText")
-  const body = document.body
-
-  const savedTheme = localStorage.getItem("theme") || "light"
-  
-  function updateTheme(isDark) {
-    if (isDark) {
-      body.setAttribute("data-theme", "dark")
-      themeIcon.innerHTML = '<path d="M12 3V1M12 23V21M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
-      themeText.textContent = "Light"
-    } else {
-      body.removeAttribute("data-theme")
-      themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2"/>'
-      themeText.textContent = "Dark"
-    }
-  }
-
-  updateTheme(savedTheme === "dark")
-
-  themeToggle?.addEventListener("click", () => {
-    const isDark = !body.hasAttribute("data-theme")
-    updateTheme(isDark)
-    localStorage.setItem("theme", isDark ? "dark" : "light")
-    updateAccessibilityScore() // Recalculate for new background
-  })
-}
-
-function initializeColorInputs() {
-  const colorMappings = [
-    { color: "coreColor", text: "coreColorText", key: "primary" },
-    { color: "primaryColor", text: "primaryColorText", key: "primary" },
-    { color: "secondaryColor", text: "secondaryColorText", key: "secondary" },
-    { color: "accentColor", text: "accentColorText", key: "accent" },
-    { color: "textColor", text: "textColorText", key: "text" }
-  ]
-
-  colorMappings.forEach(({ color, text, key }) => {
-    const colorInput = document.getElementById(color)
-    const textInput = document.getElementById(text)
-    
-    if (colorInput && textInput) {
-      colorInput.value = AppState.currentColors[key]
-      textInput.value = AppState.currentColors[key]
-    }
-  })
-}
-
-function synchronizeColorInputs() {
-  const colorMappings = [
-    { color: "coreColor", text: "coreColorText", key: "primary" },
-    { color: "primaryColor", text: "primaryColorText", key: "primary" },
-    { color: "secondaryColor", text: "secondaryColorText", key: "secondary" },
-    { color: "accentColor", text: "accentColorText", key: "accent" },
-    { color: "textColor", text: "textColorText", key: "text" }
-  ]
-
-  colorMappings.forEach(({ color, text, key }) => {
-    const colorInput = document.getElementById(color)
-    const textInput = document.getElementById(text)
-
-    if (colorInput && textInput) {
-      colorInput.addEventListener("input", (e) => {
-        const value = e.target.value.toUpperCase()
-        textInput.value = value
-        AppState.currentColors[key] = value
-        updateColorHarmony(value, color.replace("Color", ""))
-        updateAccessibilityScore()
-        updatePreviewInRealTime()
-      })
-
-      textInput.addEventListener("input", (e) => {
-        const value = e.target.value.toUpperCase()
-        if (isValidHex(value)) {
-          colorInput.value = value
-          AppState.currentColors[key] = value
-          updateColorHarmony(value, color.replace("Color", ""))
-          updateAccessibilityScore()
-          updatePreviewInRealTime()
-        }
-      })
-    }
-  })
-}
-
-function isValidHex(hex) {
-  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(hex)
-}
-
-function setupLogoUpload() {
-  const logoUploadArea = document.getElementById("logoUploadArea")
-  const logoInput = document.getElementById("logoInput")
-  const logoPreview = document.getElementById("logoPreview")
-  const logoImage = document.getElementById("logoImage")
-  const uploadPlaceholder = document.getElementById("uploadPlaceholder")
-  const removeLogo = document.getElementById("removeLogo")
-  const analyzeLogoBtn = document.getElementById("analyzeLogoBtn")
-  const aiActions = document.getElementById("aiActions")
-
-  // Click to upload
-  logoUploadArea?.addEventListener("click", () => {
-    if (!logoPreview?.style.display || logoPreview.style.display === "none") {
-      logoInput?.click()
-    }
-  })
-
-  // Drag and drop
-  logoUploadArea?.addEventListener("dragover", (e) => {
-    e.preventDefault()
-    logoUploadArea.classList.add("drag-over")
-  })
-
-  logoUploadArea?.addEventListener("dragleave", (e) => {
-    e.preventDefault()
-    logoUploadArea.classList.remove("drag-over")
-  })
-
-  logoUploadArea?.addEventListener("drop", (e) => {
-    e.preventDefault()
-    logoUploadArea.classList.remove("drag-over")
-    const files = e.dataTransfer.files
-    if (files.length > 0) {
-      handleLogoFile(files[0])
-    }
-  })
-
-  logoInput?.addEventListener("change", (e) => {
-    if (e.target.files.length > 0) {
-      handleLogoFile(e.target.files[0])
-    }
-  })
-
-  removeLogo?.addEventListener("click", (e) => {
-    e.stopPropagation()
-    resetLogoUpload()
-  })
-
-  analyzeLogoBtn?.addEventListener("click", () => {
-    if (logoImage?.src && !AppState.isAnalyzing) {
-      performLogoAnalysis(logoImage)
-    }
-  })
-
-  function handleLogoFile(file) {
-    if (!file.type.startsWith("image/")) {
-      showNotification("Please upload an image file (PNG, JPG, SVG)", "error")
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      showNotification("File size must be less than 5MB", "error")
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      logoImage.src = e.target.result
-      uploadPlaceholder.style.display = "none"
-      logoPreview.style.display = "block"
-      aiActions.style.display = "block"
-      
-      // Quick analysis
-      performQuickAnalysis()
-      showNotification("Logo uploaded! Click 'AI Analyze' for detailed analysis.", "success")
-    }
-    reader.readAsDataURL(file)
-  }
-
-  function performQuickAnalysis() {
-    const styles = ["Modern", "Classic", "Minimalist", "Bold", "Elegant"]
-    const personalities = ["Professional", "Creative", "Trustworthy", "Innovative", "Friendly"]
-    
-    const logoStyle = document.getElementById("logoStyle")
-    const brandPersonality = document.getElementById("brandPersonality")
-    
-    if (logoStyle) logoStyle.textContent = styles[Math.floor(Math.random() * styles.length)]
-    if (brandPersonality) brandPersonality.textContent = personalities[Math.floor(Math.random() * personalities.length)]
-  }
-
-  function resetLogoUpload() {
-    logoImage.src = ""
-    uploadPlaceholder.style.display = "flex"
-    logoPreview.style.display = "none"
-    aiActions.style.display = "none"
-    logoInput.value = ""
-    AppState.logoAnalysis = null
-  }
-}
-
-function performLogoAnalysis(imageElement) {
-  if (AppState.isAnalyzing) return
-  
-  AppState.isAnalyzing = true
-  const analyzeBtn = document.getElementById("analyzeLogoBtn")
-  const btnContent = analyzeBtn?.querySelector(".btn-content")
-  const btnLoading = analyzeBtn?.querySelector(".btn-loading")
-
-  // Show loading state
-  if (btnContent) btnContent.style.display = "none"
-  if (btnLoading) btnLoading.style.display = "flex"
-
-  try {
-    // Real color analysis
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-    
-    canvas.width = imageElement.naturalWidth
-    canvas.height = imageElement.naturalHeight
-    ctx.drawImage(imageElement, 0, 0)
-    
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const analysis = analyzeImageColors(imageData.data)
-    
-    AppState.logoAnalysis = analysis
-    
-    // Apply generated palette
-    if (analysis.dominantColors.length > 0) {
-      applyLogoColors(analysis)
-    }
-    
-    // Show style variations
-    document.getElementById("styleVariations").style.display = "block"
-    
-    setTimeout(() => {
-      AppState.isAnalyzing = false
-      if (btnContent) btnContent.style.display = "flex"
-      if (btnLoading) btnLoading.style.display = "none"
-      showNotification("AI analysis complete! Colors extracted from your logo.", "success")
-    }, 2000)
-    
-  } catch (error) {
-    console.error("Logo analysis error:", error)
-    AppState.isAnalyzing = false
-    if (btnContent) btnContent.style.display = "flex"
-    if (btnLoading) btnLoading.style.display = "none"
-    showNotification("Could not analyze logo. Please try a different image.", "error")
-  }
-}
-
-function analyzeImageColors(imageData) {
-  const colorCounts = {}
-  const sampleRate = 20 // Reduced sample rate for better performance
-  const minAlpha = 100 // Minimum alpha threshold
-  const minSaturation = 10 // Minimum saturation for color consideration
-
-  // Sample pixels efficiently
-  for (let i = 0; i < imageData.length; i += (sampleRate * 4)) {
-    const r = imageData[i]
-    const g = imageData[i + 1]
-    const b = imageData[i + 2]
-    const a = imageData[i + 3]
-
-    // Skip transparent, very light, or white pixels
-    if (a < minAlpha || (r > 245 && g > 245 && b > 245)) continue
-
-    const hex = rgbToHex(r, g, b)
-    const [h, s, l] = hexToHsl(hex)
-
-    // Only consider colors with some saturation or very dark colors
-    if (s > minSaturation || l < 20) {
-      // Cluster similar colors to reduce noise
-      const clusteredHex = clusterColor(hex)
-      colorCounts[clusteredHex] = (colorCounts[clusteredHex] || 0) + 1
-    }
-  }
-
-  // Sort colors by frequency and take top candidates
-  const sortedColors = Object.entries(colorCounts)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 6)
-    .map(([color]) => color)
-    .filter(color => color !== '#000000') // Filter out pure black unless it's very dominant
-
-  // Ensure we have at least one color
-  if (sortedColors.length === 0) {
-    sortedColors.push('#000000')
-  }
-
-  return {
-    dominantColors: sortedColors,
-    primaryColor: sortedColors[0] || "#000000",
-    colorCount: sortedColors.length,
-    isComplex: sortedColors.length > 3,
-    hasStrongBrand: sortedColors.length >= 2 && colorCounts[sortedColors[0]] > 100
-  }
-}
-
-// Improve the clusterColor function:
-function clusterColor(hex) {
-  const [h, s, l] = hexToHsl(hex)
-  
-  // More precise clustering for better color detection
-  const clusteredH = Math.round(h / 20) * 20 // 20-degree clusters
-  const clusteredS = Math.round(s / 25) * 25 // 25% saturation clusters  
-  const clusteredL = Math.round(l / 15) * 15 // 15% lightness clusters
-  
-  return hslToHex(clusteredH % 360, Math.min(clusteredS, 100), Math.min(clusteredL, 100))
-}
-
-function applyLogoColors(analysis) {
-  const { dominantColors } = analysis
-  
-  if (dominantColors.length > 0) {
-    // Use darkest color as primary
-    const sortedByDarkness = dominantColors.sort((a, b) => {
-      const [, , lA] = hexToHsl(a)
-      const [, , lB] = hexToHsl(b)
-      return lA - lB
-    })
-    
-    const primaryColor = sortedByDarkness[0]
-    const palette = generateSmartPalette(primaryColor)
-    
-    // Update color inputs
-    updateColorInput("primaryColor", "primaryColorText", palette.primary, "primary")
-    updateColorInput("secondaryColor", "secondaryColorText", palette.secondary, "secondary")
-    updateColorInput("accentColor", "accentColorText", palette.accent, "accent")
-    updateColorInput("textColor", "textColorText", palette.text, "text")
-    
-    // Show AI badges
-    showAIBadges()
-    
-    // Update preview
-    updatePreviewInRealTime()
-    
-    // Update recommendations
-    updateRecommendations(analysis)
-  }
-}
-
-// js/app.js
-
-// This is the missing part that should be added to the end of js/app.js
 
 // Error handling
 window.addEventListener("error", (event) => {
@@ -1395,235 +1430,6 @@ window.addEventListener("unhandledrejection", (event) => {
   showNotification("An error occurred while processing your request.", "error")
   event.preventDefault()
 })
-
-// Additional utility functions that were missing
-
-function checkColorBlindSafety(textColor, primaryColor) {
-  // Simple check - in a real implementation, you'd use more sophisticated algorithms
-  const textContrast = calculateContrastRatio("#ffffff", textColor)
-  const primaryContrast = calculateContrastRatio("#ffffff", primaryColor)
-  return textContrast >= 3 && primaryContrast >= 3
-}
-
-function checkPrintCompatibility(textColor, primaryColor) {
-  // Check if colors work well in print (high contrast, not too light)
-  const [, , textL] = hexToHsl(textColor)
-  const [, , primaryL] = hexToHsl(primaryColor)
-  return textL < 80 && primaryL < 90 // Not too light for print
-}
-
-// Enhanced notification system
-function createNotification(message, type) {
-  return new Promise((resolve) => {
-    const notification = document.createElement("div")
-    notification.className = `notification ${type}`
-    
-    const colors = {
-      success: "#059669",
-      error: "#dc2626", 
-      warning: "#d97706",
-      info: "#0ea5e9"
-    }
-    
-    const icons = {
-      success: "✓",
-      error: "✗", 
-      warning: "⚠",
-      info: "ℹ"
-    }
-    
-    notification.style.cssText = `
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      padding: 16px 24px;
-      background: ${colors[type]};
-      color: white;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 14px;
-      z-index: 1000;
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `
-    
-    notification.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`
-    document.body.appendChild(notification)
-    
-    setTimeout(() => notification.style.transform = "translateX(0)", 100)
-    
-    setTimeout(() => {
-      notification.style.transform = "translateX(100%)"
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification)
-        }
-        resolve()
-      }, 300)
-    }, 4000)
-  })
-}
-
-// Advanced color utilities
-function getColorTemperature(hex) {
-  const [h, s, l] = hexToHsl(hex)
-  
-  // Warm colors (reds, oranges, yellows)
-  if ((h >= 0 && h <= 60) || (h >= 300 && h <= 360)) {
-    return "warm"
-  }
-  // Cool colors (blues, greens, purples)
-  else if (h >= 180 && h <= 300) {
-    return "cool"
-  }
-  // Neutral colors
-  else {
-    return "neutral"
-  }
-}
-
-function generateComplementaryColor(hex) {
-  const [h, s, l] = hexToHsl(hex)
-  return hslToHex((h + 180) % 360, s, l)
-}
-
-function generateAnalogousColors(hex) {
-  const [h, s, l] = hexToHsl(hex)
-  return [
-    hslToHex((h + 30) % 360, s, l),
-    hslToHex((h - 30 + 360) % 360, s, l)
-  ]
-}
-
-function generateTriadicColors(hex) {
-  const [h, s, l] = hexToHsl(hex)
-  return [
-    hslToHex((h + 120) % 360, s, l),
-    hslToHex((h + 240) % 360, s, l)
-  ]
-}
-
-// Advanced typography utilities
-function calculateOptimalLineHeight(fontSize) {
-  // Golden ratio-based line height calculation
-  const ratio = 1.618
-  if (fontSize <= 14) return 1.6
-  if (fontSize <= 18) return 1.5
-  if (fontSize <= 24) return 1.4
-  if (fontSize <= 36) return 1.3
-  return 1.2
-}
-
-function calculateOptimalLetterSpacing(fontSize) {
-  // Larger fonts need tighter letter spacing
-  if (fontSize >= 48) return "-0.025em"
-  if (fontSize >= 36) return "-0.015em"
-  if (fontSize >= 24) return "-0.01em"
-  return "0"
-}
-
-// Enhanced export functions
-function generateDesignTokens() {
-  const colors = AppState.currentColors
-  const typography = AppState.currentTypography
-  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
-
-  return JSON.stringify({
-    colors: {
-      primary: colors.primary,
-      secondary: colors.secondary,
-      accent: colors.accent,
-      text: colors.text,
-      // Generate extended palette
-      primaryShades: {
-        50: lightenColor(colors.primary, 95),
-        100: lightenColor(colors.primary, 90),
-        200: lightenColor(colors.primary, 80),
-        300: lightenColor(colors.primary, 70),
-        400: lightenColor(colors.primary, 60),
-        500: colors.primary,
-        600: darkenColor(colors.primary, 10),
-        700: darkenColor(colors.primary, 20),
-        800: darkenColor(colors.primary, 30),
-        900: darkenColor(colors.primary, 40)
-      }
-    },
-    typography: {
-      fontFamilies: {
-        heading: typography.heading,
-        body: typography.body,
-        mono: "SF Mono, Monaco, Inconsolata, Roboto Mono, monospace"
-      },
-      fontScale: scale,
-      fontSizes: {
-        xs: "0.75rem",
-        sm: "0.875rem", 
-        base: "1rem",
-        lg: "1.125rem",
-        xl: "1.25rem",
-        "2xl": "1.5rem",
-        "3xl": "1.875rem",
-        "4xl": "2.25rem",
-        "5xl": "3rem"
-      },
-      lineHeights: {
-        none: 1,
-        tight: 1.25,
-        snug: 1.375,
-        normal: 1.5,
-        relaxed: 1.625,
-        loose: 2
-      },
-      letterSpacing: {
-        tighter: "-0.05em",
-        tight: "-0.025em", 
-        normal: "0",
-        wide: "0.025em",
-        wider: "0.05em",
-        widest: "0.1em"
-      }
-    },
-    spacing: {
-      px: "1px",
-      0: "0",
-      1: "0.25rem",
-      2: "0.5rem",
-      3: "0.75rem",
-      4: "1rem",
-      5: "1.25rem",
-      6: "1.5rem",
-      8: "2rem",
-      10: "2.5rem",
-      12: "3rem",
-      16: "4rem",
-      20: "5rem",
-      24: "6rem"
-    },
-    borderRadius: {
-      none: "0",
-      sm: "0.125rem",
-      DEFAULT: "0.25rem",
-      md: "0.375rem",
-      lg: "0.5rem",
-      xl: "0.75rem",
-      "2xl": "1rem",
-      "3xl": "1.5rem",
-      full: "9999px"
-    },
-    boxShadow: {
-      sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-      DEFAULT: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-      md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-      lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-      xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-    }
-  }, null, 2)
-}
 
 // Initialize the application when everything is loaded
 if (document.readyState === 'loading') {
