@@ -1252,3 +1252,255 @@ function applyLogoColors(analysis) {
     
     // Update recommendations
     updateRecommen
+
+    // This is the missing part that should be added to the end of js/app.js
+
+// Error handling
+window.addEventListener("error", (event) => {
+  console.error("Application error:", event.error)
+  showNotification("An unexpected error occurred. Please try again.", "error")
+})
+
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("Unhandled promise rejection:", event.reason)
+  showNotification("An error occurred while processing your request.", "error")
+  event.preventDefault()
+})
+
+// Additional utility functions that were missing
+
+function checkColorBlindSafety(textColor, primaryColor) {
+  // Simple check - in a real implementation, you'd use more sophisticated algorithms
+  const textContrast = calculateContrastRatio("#ffffff", textColor)
+  const primaryContrast = calculateContrastRatio("#ffffff", primaryColor)
+  return textContrast >= 3 && primaryContrast >= 3
+}
+
+function checkPrintCompatibility(textColor, primaryColor) {
+  // Check if colors work well in print (high contrast, not too light)
+  const [, , textL] = hexToHsl(textColor)
+  const [, , primaryL] = hexToHsl(primaryColor)
+  return textL < 80 && primaryL < 90 // Not too light for print
+}
+
+// Enhanced notification system
+function createNotification(message, type) {
+  return new Promise((resolve) => {
+    const notification = document.createElement("div")
+    notification.className = `notification ${type}`
+    
+    const colors = {
+      success: "#059669",
+      error: "#dc2626", 
+      warning: "#d97706",
+      info: "#0ea5e9"
+    }
+    
+    const icons = {
+      success: "✓",
+      error: "✗", 
+      warning: "⚠",
+      info: "ℹ"
+    }
+    
+    notification.style.cssText = `
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      background: ${colors[type]};
+      color: white;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 1000;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    `
+    
+    notification.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`
+    document.body.appendChild(notification)
+    
+    setTimeout(() => notification.style.transform = "translateX(0)", 100)
+    
+    setTimeout(() => {
+      notification.style.transform = "translateX(100%)"
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification)
+        }
+        resolve()
+      }, 300)
+    }, 4000)
+  })
+}
+
+// Advanced color utilities
+function getColorTemperature(hex) {
+  const [h, s, l] = hexToHsl(hex)
+  
+  // Warm colors (reds, oranges, yellows)
+  if ((h >= 0 && h <= 60) || (h >= 300 && h <= 360)) {
+    return "warm"
+  }
+  // Cool colors (blues, greens, purples)
+  else if (h >= 180 && h <= 300) {
+    return "cool"
+  }
+  // Neutral colors
+  else {
+    return "neutral"
+  }
+}
+
+function generateComplementaryColor(hex) {
+  const [h, s, l] = hexToHsl(hex)
+  return hslToHex((h + 180) % 360, s, l)
+}
+
+function generateAnalogousColors(hex) {
+  const [h, s, l] = hexToHsl(hex)
+  return [
+    hslToHex((h + 30) % 360, s, l),
+    hslToHex((h - 30 + 360) % 360, s, l)
+  ]
+}
+
+function generateTriadicColors(hex) {
+  const [h, s, l] = hexToHsl(hex)
+  return [
+    hslToHex((h + 120) % 360, s, l),
+    hslToHex((h + 240) % 360, s, l)
+  ]
+}
+
+// Advanced typography utilities
+function calculateOptimalLineHeight(fontSize) {
+  // Golden ratio-based line height calculation
+  const ratio = 1.618
+  if (fontSize <= 14) return 1.6
+  if (fontSize <= 18) return 1.5
+  if (fontSize <= 24) return 1.4
+  if (fontSize <= 36) return 1.3
+  return 1.2
+}
+
+function calculateOptimalLetterSpacing(fontSize) {
+  // Larger fonts need tighter letter spacing
+  if (fontSize >= 48) return "-0.025em"
+  if (fontSize >= 36) return "-0.015em"
+  if (fontSize >= 24) return "-0.01em"
+  return "0"
+}
+
+// Enhanced export functions
+function generateDesignTokens() {
+  const colors = AppState.currentColors
+  const typography = AppState.currentTypography
+  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
+
+  return JSON.stringify({
+    colors: {
+      primary: colors.primary,
+      secondary: colors.secondary,
+      accent: colors.accent,
+      text: colors.text,
+      // Generate extended palette
+      primaryShades: {
+        50: lightenColor(colors.primary, 95),
+        100: lightenColor(colors.primary, 90),
+        200: lightenColor(colors.primary, 80),
+        300: lightenColor(colors.primary, 70),
+        400: lightenColor(colors.primary, 60),
+        500: colors.primary,
+        600: darkenColor(colors.primary, 10),
+        700: darkenColor(colors.primary, 20),
+        800: darkenColor(colors.primary, 30),
+        900: darkenColor(colors.primary, 40)
+      }
+    },
+    typography: {
+      fontFamilies: {
+        heading: typography.heading,
+        body: typography.body,
+        mono: "SF Mono, Monaco, Inconsolata, Roboto Mono, monospace"
+      },
+      fontScale: scale,
+      fontSizes: {
+        xs: "0.75rem",
+        sm: "0.875rem", 
+        base: "1rem",
+        lg: "1.125rem",
+        xl: "1.25rem",
+        "2xl": "1.5rem",
+        "3xl": "1.875rem",
+        "4xl": "2.25rem",
+        "5xl": "3rem"
+      },
+      lineHeights: {
+        none: 1,
+        tight: 1.25,
+        snug: 1.375,
+        normal: 1.5,
+        relaxed: 1.625,
+        loose: 2
+      },
+      letterSpacing: {
+        tighter: "-0.05em",
+        tight: "-0.025em", 
+        normal: "0",
+        wide: "0.025em",
+        wider: "0.05em",
+        widest: "0.1em"
+      }
+    },
+    spacing: {
+      px: "1px",
+      0: "0",
+      1: "0.25rem",
+      2: "0.5rem",
+      3: "0.75rem",
+      4: "1rem",
+      5: "1.25rem",
+      6: "1.5rem",
+      8: "2rem",
+      10: "2.5rem",
+      12: "3rem",
+      16: "4rem",
+      20: "5rem",
+      24: "6rem"
+    },
+    borderRadius: {
+      none: "0",
+      sm: "0.125rem",
+      DEFAULT: "0.25rem",
+      md: "0.375rem",
+      lg: "0.5rem",
+      xl: "0.75rem",
+      "2xl": "1rem",
+      "3xl": "1.5rem",
+      full: "9999px"
+    },
+    boxShadow: {
+      sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      DEFAULT: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+      md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+      xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+    }
+  }, null, 2)
+}
+
+// Initialize the application when everything is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('StyleCraft Pro initialized successfully')
+  })
+} else {
+  console.log('StyleCraft Pro initialized successfully')
+}
