@@ -22,12 +22,18 @@ const AppState = {
 }
 
 function initializeApp() {
-  initializeTheme()
-  initializeColorInputs()
-  synchronizeColorInputs()
-  setupAccessibilityChecker()
-  setupLogoUpload()
-  updatePreviewInRealTime()
+  try {
+    initializeTheme()
+    initializeColorInputs()
+    synchronizeColorInputs()
+    setupAccessibilityChecker()
+    setupLogoUpload()
+    updatePreviewInRealTime()
+    console.log('Freestyler initialized successfully')
+  } catch (error) {
+    console.error('Error initializing app:', error)
+    showNotification('App initialization failed. Please refresh the page.', 'error')
+  }
 }
 
 function initializeTheme() {
@@ -35,6 +41,11 @@ function initializeTheme() {
   const themeIcon = document.getElementById("themeIcon")
   const themeText = document.getElementById("themeText")
   const body = document.body
+
+  if (!themeToggle || !themeIcon || !themeText) {
+    console.warn('Theme toggle elements not found')
+    return
+  }
 
   const savedTheme = localStorage.getItem("theme") || "light"
   
@@ -52,11 +63,11 @@ function initializeTheme() {
 
   updateTheme(savedTheme === "dark")
 
-  themeToggle?.addEventListener("click", () => {
+  themeToggle.addEventListener("click", () => {
     const isDark = !body.hasAttribute("data-theme")
     updateTheme(isDark)
     localStorage.setItem("theme", isDark ? "dark" : "light")
-    updateAccessibilityScore() // Recalculate for new background
+    updateAccessibilityScore()
   })
 }
 
@@ -131,25 +142,30 @@ function setupLogoUpload() {
   const analyzeLogoBtn = document.getElementById("analyzeLogoBtn")
   const aiActions = document.getElementById("aiActions")
 
+  if (!logoUploadArea || !logoInput) {
+    console.warn('Logo upload elements not found')
+    return
+  }
+
   // Click to upload
-  logoUploadArea?.addEventListener("click", () => {
+  logoUploadArea.addEventListener("click", () => {
     if (!logoPreview?.style.display || logoPreview.style.display === "none") {
       logoInput?.click()
     }
   })
 
   // Drag and drop
-  logoUploadArea?.addEventListener("dragover", (e) => {
+  logoUploadArea.addEventListener("dragover", (e) => {
     e.preventDefault()
     logoUploadArea.classList.add("drag-over")
   })
 
-  logoUploadArea?.addEventListener("dragleave", (e) => {
+  logoUploadArea.addEventListener("dragleave", (e) => {
     e.preventDefault()
     logoUploadArea.classList.remove("drag-over")
   })
 
-  logoUploadArea?.addEventListener("drop", (e) => {
+  logoUploadArea.addEventListener("drop", (e) => {
     e.preventDefault()
     logoUploadArea.classList.remove("drag-over")
     const files = e.dataTransfer.files
@@ -158,7 +174,7 @@ function setupLogoUpload() {
     }
   })
 
-  logoInput?.addEventListener("change", (e) => {
+  logoInput.addEventListener("change", (e) => {
     if (e.target.files.length > 0) {
       handleLogoFile(e.target.files[0])
     }
@@ -188,12 +204,11 @@ function setupLogoUpload() {
 
     const reader = new FileReader()
     reader.onload = (e) => {
-      logoImage.src = e.target.result
-      uploadPlaceholder.style.display = "none"
-      logoPreview.style.display = "block"
-      aiActions.style.display = "block"
+      if (logoImage) logoImage.src = e.target.result
+      if (uploadPlaceholder) uploadPlaceholder.style.display = "none"
+      if (logoPreview) logoPreview.style.display = "block"
+      if (aiActions) aiActions.style.display = "block"
       
-      // Quick analysis
       performQuickAnalysis()
       showNotification("Logo uploaded! Click 'Analyze' for detailed analysis.", "success")
     }
@@ -212,11 +227,11 @@ function setupLogoUpload() {
   }
 
   function resetLogoUpload() {
-    logoImage.src = ""
-    uploadPlaceholder.style.display = "flex"
-    logoPreview.style.display = "none"
-    aiActions.style.display = "none"
-    logoInput.value = ""
+    if (logoImage) logoImage.src = ""
+    if (uploadPlaceholder) uploadPlaceholder.style.display = "flex"
+    if (logoPreview) logoPreview.style.display = "none"
+    if (aiActions) aiActions.style.display = "none"
+    if (logoInput) logoInput.value = ""
     AppState.logoAnalysis = null
   }
 }
@@ -238,8 +253,8 @@ function performLogoAnalysis(imageElement) {
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")
     
-    canvas.width = imageElement.naturalWidth
-    canvas.height = imageElement.naturalHeight
+    canvas.width = imageElement.naturalWidth || imageElement.width
+    canvas.height = imageElement.naturalHeight || imageElement.height
     ctx.drawImage(imageElement, 0, 0)
     
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -253,7 +268,8 @@ function performLogoAnalysis(imageElement) {
     }
     
     // Show style variations
-    document.getElementById("styleVariations").style.display = "block"
+    const styleVariations = document.getElementById("styleVariations")
+    if (styleVariations) styleVariations.style.display = "block"
     
     setTimeout(() => {
       AppState.isAnalyzing = false
@@ -273,39 +289,33 @@ function performLogoAnalysis(imageElement) {
 
 function analyzeImageColors(imageData) {
   const colorCounts = {}
-  const sampleRate = 20 // Reduced sample rate for better performance
-  const minAlpha = 100 // Minimum alpha threshold
-  const minSaturation = 10 // Minimum saturation for color consideration
+  const sampleRate = 20
+  const minAlpha = 100
+  const minSaturation = 10
 
-  // Sample pixels efficiently
   for (let i = 0; i < imageData.length; i += (sampleRate * 4)) {
     const r = imageData[i]
     const g = imageData[i + 1]
     const b = imageData[i + 2]
     const a = imageData[i + 3]
 
-    // Skip transparent, very light, or white pixels
     if (a < minAlpha || (r > 245 && g > 245 && b > 245)) continue
 
     const hex = rgbToHex(r, g, b)
     const [h, s, l] = hexToHsl(hex)
 
-    // Only consider colors with some saturation or very dark colors
     if (s > minSaturation || l < 20) {
-      // Cluster similar colors to reduce noise
       const clusteredHex = clusterColor(hex)
       colorCounts[clusteredHex] = (colorCounts[clusteredHex] || 0) + 1
     }
   }
 
-  // Sort colors by frequency and take top candidates
   const sortedColors = Object.entries(colorCounts)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 6)
     .map(([color]) => color)
-    .filter(color => color !== '#000000') // Filter out pure black unless it's very dominant
+    .filter(color => color !== '#000000')
 
-  // Ensure we have at least one color
   if (sortedColors.length === 0) {
     sortedColors.push('#000000')
   }
@@ -322,10 +332,9 @@ function analyzeImageColors(imageData) {
 function clusterColor(hex) {
   const [h, s, l] = hexToHsl(hex)
   
-  // More precise clustering for better color detection
-  const clusteredH = Math.round(h / 20) * 20 // 20-degree clusters
-  const clusteredS = Math.round(s / 25) * 25 // 25% saturation clusters  
-  const clusteredL = Math.round(l / 15) * 15 // 15% lightness clusters
+  const clusteredH = Math.round(h / 20) * 20
+  const clusteredS = Math.round(s / 25) * 25  
+  const clusteredL = Math.round(l / 15) * 15
   
   return hslToHex(clusteredH % 360, Math.min(clusteredS, 100), Math.min(clusteredL, 100))
 }
@@ -334,7 +343,6 @@ function applyLogoColors(analysis) {
   const { dominantColors } = analysis
   
   if (dominantColors.length > 0) {
-    // Use darkest color as primary
     const sortedByDarkness = dominantColors.sort((a, b) => {
       const [, , lA] = hexToHsl(a)
       const [, , lB] = hexToHsl(b)
@@ -344,16 +352,12 @@ function applyLogoColors(analysis) {
     const primaryColor = sortedByDarkness[0]
     const palette = generateSmartPalette(primaryColor)
     
-    // Update color inputs
     updateColorInput("primaryColor", "primaryColorText", palette.primary, "primary")
     updateColorInput("secondaryColor", "secondaryColorText", palette.secondary, "secondary")
     updateColorInput("accentColor", "accentColorText", palette.accent, "accent")
     updateColorInput("textColor", "textColorText", palette.text, "text")
     
-    // Update preview
     updatePreviewInRealTime()
-    
-    // Update recommendations
     updateRecommendations(analysis)
   }
 }
@@ -365,21 +369,17 @@ function generateSmartPalette(primaryColor) {
   
   const [h, s, l] = hexToHsl(primaryColor)
   
-  // Generate sophisticated palette based on primary color
   let secondary, accent, text
   
   if (l < 30) {
-    // Dark primary - create lighter supporting colors
     secondary = hslToHex(h, Math.max(s - 20, 10), Math.min(l + 25, 70))
     accent = hslToHex(h, Math.max(s - 30, 5), Math.min(l + 50, 90))
     text = l < 15 ? "#f8fafc" : "#111827"
   } else if (l > 70) {
-    // Light primary - create darker supporting colors  
     secondary = hslToHex(h, Math.min(s + 10, 50), Math.max(l - 30, 30))
     accent = hslToHex(h, Math.max(s - 20, 10), Math.max(l - 15, 85))
     text = "#111827"
   } else {
-    // Medium primary - balanced approach
     secondary = hslToHex(h, Math.max(s - 15, 15), Math.min(l + 20, 75))
     accent = hslToHex(h, Math.max(s - 25, 5), Math.min(l + 35, 90))
     text = l > 50 ? "#111827" : "#f8fafc"
@@ -397,7 +397,6 @@ function updateColorInput(colorId, textId, value, key) {
   const colorInput = document.getElementById(colorId)
   const textInput = document.getElementById(textId)
   
-  // Validate hex color format
   if (!isValidHex(value)) {
     console.warn(`Invalid hex color: ${value}`)
     return
@@ -408,14 +407,10 @@ function updateColorInput(colorId, textId, value, key) {
   
   AppState.currentColors[key] = value
   
-  // Update harmony visualization
   const harmonyKey = colorId.replace("Color", "").replace("core", "primary")
   updateColorHarmony(value, harmonyKey)
   
-  // Update accessibility score
   updateAccessibilityScore()
-  
-  // Update preview in real-time
   updatePreviewInRealTime()
 }
 
@@ -425,29 +420,18 @@ function updateRecommendations(analysis) {
   
   if (recommendationText && analysis) {
     const confidence = Math.min(95, 70 + analysis.colorCount * 5)
-    confidenceScore.textContent = `${confidence}%`
+    if (confidenceScore) confidenceScore.textContent = `${confidence}%`
     
     recommendationText.textContent = `Analysis Complete: Extracted ${analysis.colorCount} brand colors from your logo. Generated professional palette optimized for your brand identity with ${confidence}% confidence.`
   }
 }
 
 function setupEventListeners() {
-  // Preview tabs
   setupPreviewTabs()
-  
-  // Generate buttons
   setupGenerateButtons()
-  
-  // Export buttons
   setupExportButtons()
-  
-  // Typography and industry changes
   setupFormListeners()
-  
-  // Style guide generation
   setupStyleGuideGeneration()
-  
-  // Template system
   setupTemplateSystem()
 }
 
@@ -462,14 +446,17 @@ function setupPreviewTabs() {
       
       tab.classList.add("active")
       const targetId = tab.dataset.tab
-      document.getElementById(targetId)?.classList.add("active")
+      const targetPanel = document.getElementById(targetId)
+      if (targetPanel) targetPanel.classList.add("active")
     })
   })
 }
 
 function setupGenerateButtons() {
-  // Color generation
-  document.getElementById("generateColorsBtn")?.addEventListener("click", () => {
+  const generateColorsBtn = document.getElementById("generateColorsBtn")
+  const generateTypographyBtn = document.getElementById("generateTypographyBtn")
+
+  generateColorsBtn?.addEventListener("click", () => {
     const coreColor = AppState.currentColors.primary
     const palette = generateSmartPalette(coreColor)
     
@@ -484,14 +471,14 @@ function setupGenerateButtons() {
     showNotification("Smart color palette generated!", "success")
   })
 
-  // Typography generation
-  document.getElementById("generateTypographyBtn")?.addEventListener("click", () => {
-    const industry = document.getElementById("industry").value
-    const positioning = document.getElementById("positioning").value
+  generateTypographyBtn?.addEventListener("click", () => {
+    const industry = document.getElementById("industry")?.value || "tech"
+    const positioning = document.getElementById("positioning")?.value || "professional"
     const pair = generateIntelligentTypographyPair(industry, positioning)
     
     AppState.currentTypography = pair
-    document.getElementById("coreFont").value = pair.heading
+    const coreFontSelect = document.getElementById("coreFont")
+    if (coreFontSelect) coreFontSelect.value = pair.heading
     
     updatePreviewInRealTime()
     showNotification(`Smart typography pair: ${pair.heading} + ${pair.body}`, "success")
@@ -534,12 +521,14 @@ function applyTemplate(template) {
   const config = templates[template]
   if (!config) return
   
-  // Apply configuration
-  document.getElementById("industry").value = config.industry
-  document.getElementById("positioning").value = config.positioning
-  document.getElementById("coreFont").value = config.font
+  const industrySelect = document.getElementById("industry")
+  const positioningSelect = document.getElementById("positioning")
+  const coreFontSelect = document.getElementById("coreFont")
   
-  // Apply colors
+  if (industrySelect) industrySelect.value = config.industry
+  if (positioningSelect) positioningSelect.value = config.positioning
+  if (coreFontSelect) coreFontSelect.value = config.font
+  
   Object.entries(config.colors).forEach(([key, value]) => {
     const colorId = key === "primary" ? "primaryColor" : `${key}Color`
     const textId = key === "primary" ? "primaryColorText" : `${key}ColorText`
@@ -574,97 +563,20 @@ function generateIntelligentTypographyPair(industry, positioning) {
       playful: { heading: "Poppins", body: "Inter" },
       minimalist: { heading: "Inter", body: "Inter" },
       bold: { heading: "Montserrat", body: "Roboto" }
-    },
-    healthcare: {
-      professional: { heading: "Inter", body: "Inter" },
-      trustworthy: { heading: "Source Sans Pro", body: "Source Sans Pro" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      innovative: { heading: "Poppins", body: "Inter" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      luxury: { heading: "Lora", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Inter" }
-    },
-    creative: {
-      playful: { heading: "Poppins", body: "Open Sans" },
-      innovative: { heading: "Montserrat", body: "Inter" },
-      luxury: { heading: "Playfair Display", body: "Lora" },
-      professional: { heading: "Montserrat", body: "Inter" },
-      trustworthy: { heading: "Lora", body: "Inter" },
-      friendly: { heading: "Poppins", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Roboto" }
-    },
-    legal: {
-      professional: { heading: "Playfair Display", body: "Lora" },
-      trustworthy: { heading: "Lora", body: "Source Sans Pro" },
-      luxury: { heading: "Playfair Display", body: "Inter" },
-      innovative: { heading: "Montserrat", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      playful: { heading: "Poppins", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Roboto" }
-    },
-    ecommerce: {
-      friendly: { heading: "Montserrat", body: "Open Sans" },
-      luxury: { heading: "Playfair Display", body: "Lora" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      professional: { heading: "Inter", body: "Inter" },
-      trustworthy: { heading: "Lora", body: "Inter" },
-      innovative: { heading: "Montserrat", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Roboto" }
-    },
-    consulting: {
-      professional: { heading: "Playfair Display", body: "Inter" },
-      trustworthy: { heading: "Lora", body: "Inter" },
-      luxury: { heading: "Playfair Display", body: "Lora" },
-      innovative: { heading: "Montserrat", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      playful: { heading: "Poppins", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Roboto" }
-    },
-    education: {
-      professional: { heading: "Lora", body: "Inter" },
-      trustworthy: { heading: "Source Sans Pro", body: "Source Sans Pro" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      innovative: { heading: "Poppins", body: "Inter" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      luxury: { heading: "Playfair Display", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Inter" }
-    },
-    nonprofit: {
-      trustworthy: { heading: "Lora", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      professional: { heading: "Source Sans Pro", body: "Source Sans Pro" },
-      innovative: { heading: "Poppins", body: "Inter" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      luxury: { heading: "Playfair Display", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Inter" }
     }
   }
   
-  // Get the specific pair or fallback to a safe default
-  const industryPairs = pairs[industry]
-  if (!industryPairs) {
-    return { heading: "Inter", body: "Inter" }
-  }
-  
-  const selectedPair = industryPairs[positioning]
-  if (!selectedPair) {
-    // Fallback to the first available pair for the industry
-    const firstKey = Object.keys(industryPairs)[0]
-    return industryPairs[firstKey] || { heading: "Inter", body: "Inter" }
-  }
+  const industryPairs = pairs[industry] || pairs.tech
+  const selectedPair = industryPairs[positioning] || industryPairs.professional
   
   return selectedPair
 }
 
 function setupExportButtons() {
-  document.getElementById("copyCssBtn")?.addEventListener("click", async () => {
+  const copyCssBtn = document.getElementById("copyCssBtn")
+  const downloadPackageBtn = document.getElementById("downloadPackageBtn")
+
+  copyCssBtn?.addEventListener("click", async () => {
     const css = generateComprehensiveCSS()
     try {
       await navigator.clipboard.writeText(css)
@@ -674,7 +586,7 @@ function setupExportButtons() {
     }
   })
 
-  document.getElementById("downloadPackageBtn")?.addEventListener("click", () => {
+  downloadPackageBtn?.addEventListener("click", () => {
     const css = generateComprehensiveCSS()
     downloadFile(css, `stylecraft-pro-${Date.now()}.css`, "text/css")
     showNotification("CSS framework downloaded!", "success")
@@ -682,9 +594,9 @@ function setupExportButtons() {
 }
 
 function setupFormListeners() {
-  // Industry and positioning changes
   ["industry", "positioning", "fontScale", "coreFont"].forEach(id => {
-    document.getElementById(id)?.addEventListener("change", () => {
+    const element = document.getElementById(id)
+    element?.addEventListener("change", () => {
       updatePreviewInRealTime()
     })
   })
@@ -705,32 +617,27 @@ function setupStyleGuideGeneration() {
 }
 
 function generateCompleteStyleGuide() {
-  const industry = document.getElementById("industry").value
-  const positioning = document.getElementById("positioning").value
-  const scale = parseFloat(document.getElementById("fontScale").value)
+  const industry = document.getElementById("industry")?.value || "tech"
+  const positioning = document.getElementById("positioning")?.value || "professional"
+  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
   
-  // Update content based on industry
   updatePreviewContent(industry)
   
-  // Generate breakdown
   const breakdown = generateStyleBreakdown(AppState.currentColors, AppState.currentTypography, industry, positioning, scale)
   displayBreakdown(breakdown)
   
-  // Update final recommendations
   updateFinalRecommendations(industry, positioning)
 }
 
 function updatePreviewInRealTime() {
-  const scale = parseFloat(document.getElementById("fontScale").value || "1.25")
+  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
   
-  // Apply colors to CSS variables
   const root = document.documentElement
   root.style.setProperty("--accent-color", AppState.currentColors.primary)
   root.style.setProperty("--accent-hover", darkenColor(AppState.currentColors.primary, 10))
   root.style.setProperty("--success-color", AppState.currentColors.accent)
   root.style.setProperty("--text-primary", AppState.currentColors.text)
   
-  // Apply typography
   const preview = document.getElementById("previewContent")
   if (preview) {
     preview.style.fontFamily = `'${AppState.currentTypography.body}', sans-serif`
@@ -740,7 +647,6 @@ function updatePreviewInRealTime() {
       heading.style.fontFamily = `'${AppState.currentTypography.heading}', sans-serif`
     })
     
-    // Apply font sizes based on scale
     applyModularScale(preview, scale)
   }
 }
@@ -775,59 +681,58 @@ function setupAccessibilityChecker() {
 }
 
 function updateAccessibilityScore() {
-  const body = document.body
-  const bgColor = body.hasAttribute("data-theme") ? "#0f172a" : "#ffffff"
-  const textColor = AppState.currentColors.text || "#111827"
-  const primaryColor = AppState.currentColors.primary || "#000000"
-  
-  const textContrast = calculateContrastRatio(bgColor, textColor)
-  const primaryContrast = calculateContrastRatio(bgColor, primaryColor)
-  
-  // Update UI elements safely
-  const scoreEl = document.getElementById("accessibilityScore")
-  const ratioEl = document.getElementById("contrastRatio")
-  const colorBlindEl = document.getElementById("colorBlindSafe")
-  const printCompatibleEl = document.getElementById("printCompatible")
-  
-  if (ratioEl) ratioEl.textContent = `${textContrast.toFixed(1)}:1`
-  
-  let score = "AA"
-  if (textContrast >= 7 && primaryContrast >= 4.5) score = "AAA"
-  else if (textContrast < 4.5 || primaryContrast < 3) score = "Fail"
-  
-  if (scoreEl) {
-    scoreEl.textContent = score
-    scoreEl.className = `accessibility-score ${score.toLowerCase()}`
-  }
-  
-  // Update additional accessibility info
-  if (colorBlindEl) {
-    const isColorBlindSafe = checkColorBlindSafety(textColor, primaryColor)
-    colorBlindEl.textContent = isColorBlindSafe ? "✓ Yes" : "⚠ Review"
-  }
-  
-  if (printCompatibleEl) {
-    const isPrintCompatible = checkPrintCompatibility(textColor, primaryColor)
-    printCompatibleEl.textContent = isPrintCompatible ? "✓ Yes" : "⚠ Review"
+  try {
+    const body = document.body
+    const bgColor = body.hasAttribute("data-theme") ? "#0f172a" : "#ffffff"
+    const textColor = AppState.currentColors.text || "#111827"
+    const primaryColor = AppState.currentColors.primary || "#000000"
+    
+    const textContrast = calculateContrastRatio(bgColor, textColor)
+    const primaryContrast = calculateContrastRatio(bgColor, primaryColor)
+    
+    const scoreEl = document.getElementById("accessibilityScore")
+    const ratioEl = document.getElementById("contrastRatio")
+    const colorBlindEl = document.getElementById("colorBlindSafe")
+    const printCompatibleEl = document.getElementById("printCompatible")
+    
+    if (ratioEl) ratioEl.textContent = `${textContrast.toFixed(1)}:1`
+    
+    let score = "AA"
+    if (textContrast >= 7 && primaryContrast >= 4.5) score = "AAA"
+    else if (textContrast < 4.5 || primaryContrast < 3) score = "Fail"
+    
+    if (scoreEl) {
+      scoreEl.textContent = score
+      scoreEl.className = `accessibility-score ${score.toLowerCase()}`
+    }
+    
+    if (colorBlindEl) {
+      const isColorBlindSafe = checkColorBlindSafety(textColor, primaryColor)
+      colorBlindEl.textContent = isColorBlindSafe ? "✓ Yes" : "⚠ Review"
+    }
+    
+    if (printCompatibleEl) {
+      const isPrintCompatible = checkPrintCompatibility(textColor, primaryColor)
+      printCompatibleEl.textContent = isPrintCompatible ? "✓ Yes" : "⚠ Review"
+    }
+  } catch (error) {
+    console.error('Error updating accessibility score:', error)
   }
 }
 
 function checkColorBlindSafety(textColor, primaryColor) {
-  // Simple check - in a real implementation, you'd use more sophisticated algorithms
   const textContrast = calculateContrastRatio("#ffffff", textColor)
   const primaryContrast = calculateContrastRatio("#ffffff", primaryColor)
   return textContrast >= 3 && primaryContrast >= 3
 }
 
 function checkPrintCompatibility(textColor, primaryColor) {
-  // Check if colors work well in print (high contrast, not too light)
   const [, , textL] = hexToHsl(textColor)
   const [, , primaryL] = hexToHsl(primaryColor)
-  return textL < 80 && primaryL < 90 // Not too light for print
+  return textL < 80 && primaryL < 90
 }
 
 function setupColorHarmony() {
-  // Initialize harmony indicators for existing colors
   Object.keys(AppState.currentColors).forEach(key => {
     const colorValue = AppState.currentColors[key]
     updateColorHarmony(colorValue, key)
@@ -836,7 +741,7 @@ function setupColorHarmony() {
 
 function updateColorHarmony(color, prefix) {
   const harmonyEl = document.getElementById(`${prefix}Harmony`)
-  if (!harmonyEl) return
+  if (!harmonyEl || !isValidHex(color)) return
   
   const [h, s, l] = hexToHsl(color)
   const complementary = hslToHex((h + 180) % 360, s, l)
@@ -897,18 +802,15 @@ function setupViewControls() {
 
 function applyViewMode(view) {
   const previewContent = document.getElementById("previewContent")
+  if (!previewContent) return
 
-  // Remove existing view classes
   previewContent.classList.remove("desktop-view", "mobile-view", "accessibility-view")
-
-  // Add new view class
   previewContent.classList.add(`${view}-view`)
 
   if (view === "mobile") {
     previewContent.style.maxWidth = "375px"
     previewContent.style.margin = "0 auto"
   } else if (view === "accessibility") {
-    // Apply high contrast mode
     previewContent.style.filter = "contrast(1.5)"
   } else {
     previewContent.style.maxWidth = ""
@@ -923,6 +825,8 @@ function rgbToHex(r, g, b) {
 }
 
 function hexToHsl(hex) {
+  if (!isValidHex(hex)) return [0, 0, 0]
+  
   const r = parseInt(hex.slice(1, 3), 16) / 255
   const g = parseInt(hex.slice(3, 5), 16) / 255
   const b = parseInt(hex.slice(5, 7), 16) / 255
@@ -959,7 +863,7 @@ function hslToHex(h, s, l) {
   else if (1/3 <= h && h < 1/2) { r = 0; g = c; b = x }
   else if (1/2 <= h && h < 2/3) { r = 0; g = x; b = c }
   else if (2/3 <= h && h < 5/6) { r = x; g = 0; b = c }
-  else if (5/6 <= h && h < 1) { r = c; g = 0; b = x }
+  else if 5/6 <= h && h < 1) { r = c; g = 0; b = x }
 
   r = Math.round((r + m) * 255)
   g = Math.round((g + m) * 255)
@@ -969,17 +873,21 @@ function hslToHex(h, s, l) {
 }
 
 function darkenColor(hex, percent) {
+  if (!isValidHex(hex)) return hex
   const [h, s, l] = hexToHsl(hex)
   return hslToHex(h, s, Math.max(l - percent, 0))
 }
 
 function lightenColor(hex, percent) {
+  if (!isValidHex(hex)) return hex
   const [h, s, l] = hexToHsl(hex)
   return hslToHex(h, s, Math.min(l + percent, 100))
 }
 
 function calculateContrastRatio(color1, color2) {
   const getLuminance = (hex) => {
+    if (!isValidHex(hex)) return 0
+    
     const r = parseInt(hex.slice(1, 3), 16) / 255
     const g = parseInt(hex.slice(3, 5), 16) / 255
     const b = parseInt(hex.slice(5, 7), 16) / 255
@@ -1044,11 +952,16 @@ function showNotification(message, type = "success") {
   
   setTimeout(() => {
     notification.style.transform = "translateX(100%)"
-    setTimeout(() => document.body.removeChild(notification), 300)
+    setTimeout(() => {
+      if (document.body.contains(notification)) {
+        document.body.removeChild(notification)
+      }
+    }, 300)
   }, 4000)
 }
 
 function showLoadingState(button) {
+  if (!button) return
   const content = button.querySelector(".btn-content")
   const loading = button.querySelector(".btn-loading")
   if (content) content.style.display = "none"
@@ -1056,6 +969,7 @@ function showLoadingState(button) {
 }
 
 function hideLoadingState(button) {
+  if (!button) return
   const content = button.querySelector(".btn-content")
   const loading = button.querySelector(".btn-loading")
   if (content) content.style.display = "flex"
@@ -1358,9 +1272,8 @@ function updateFinalRecommendations(industry, positioning) {
 }
 
 function calculateConfidence(industry, positioning) {
-  let score = 85 // Base confidence
+  let score = 85
   
-  // Industry-specific adjustments
   const industryBonus = {
     tech: 5,
     finance: 8,
@@ -1370,7 +1283,6 @@ function calculateConfidence(industry, positioning) {
   
   score += industryBonus[industry] || 0
   
-  // Logo analysis bonus
   if (AppState.logoAnalysis) score += 8
   
   return Math.min(score, 98)
