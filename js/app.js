@@ -1,4 +1,191 @@
-// StyleCraft Pro - Complete Fixed Application Logic
+// StyleCraft Pro - Consolidated & Fixed Application Logic
+
+// --- DATA STORE (from generators.js) ---
+const typographyPairs = {
+  tech: {
+    professional: [
+      { heading: "Inter", body: "Inter", weights: [400, 500, 600, 700, 800] },
+      { heading: "Roboto", body: "Roboto", weights: [300, 400, 500, 700] },
+      { heading: "Source Sans Pro", body: "Source Sans Pro", weights: [300, 400, 600, 700] },
+    ],
+    innovative: [
+      { heading: "Poppins", body: "Inter", weights: [400, 500, 600, 700] },
+      { heading: "Montserrat", body: "Open Sans", weights: [300, 400, 600, 700] },
+      { heading: "Inter", body: "Roboto", weights: [400, 500, 600, 700] },
+    ],
+    friendly: [
+      { heading: "Open Sans", body: "Open Sans", weights: [400, 500, 600, 700] },
+      { heading: "Poppins", body: "Poppins", weights: [300, 400, 500, 600] },
+    ],
+  },
+  finance: {
+    professional: [
+      { heading: "Playfair Display", body: "Inter", weights: [400, 500, 600, 700] },
+      { heading: "Lora", body: "Source Sans Pro", weights: [400, 500, 600, 700] },
+      { heading: "Inter", body: "Inter", weights: [400, 500, 600, 700, 800] },
+    ],
+    trustworthy: [
+      { heading: "Lora", body: "Inter", weights: [400, 500, 600, 700] },
+      { heading: "Inter", body: "Inter", weights: [400, 500, 600, 700, 800] },
+    ],
+    luxury: [
+      { heading: "Playfair Display", body: "Lora", weights: [400, 500, 600, 700] },
+      { heading: "Lora", body: "Source Sans Pro", weights: [400, 500, 600, 700] },
+    ],
+  },
+  healthcare: {
+    trustworthy: [
+      { heading: "Inter", body: "Inter", weights: [400, 500, 600, 700] },
+      { heading: "Source Sans Pro", body: "Source Sans Pro", weights: [300, 400, 600, 700] },
+    ],
+    professional: [
+      { heading: "Roboto", body: "Roboto", weights: [300, 400, 500, 700] },
+      { heading: "Inter", body: "Inter", weights: [400, 500, 600, 700] },
+    ],
+    friendly: [
+      { heading: "Open Sans", body: "Open Sans", weights: [400, 500, 600, 700] },
+      { heading: "Poppins", body: "Inter", weights: [400, 500, 600, 700] },
+    ],
+  },
+  creative: {
+    playful: [
+      { heading: "Poppins", body: "Open Sans", weights: [400, 500, 600, 700] },
+      { heading: "Montserrat", body: "Inter", weights: [300, 400, 500, 600] },
+    ],
+    innovative: [
+      { heading: "Montserrat", body: "Inter", weights: [400, 500, 600, 700] },
+      { heading: "Poppins", body: "Source Sans Pro", weights: [300, 400, 600, 700] },
+    ],
+    luxury: [
+      { heading: "Playfair Display", body: "Lora", weights: [400, 500, 600, 700] },
+      { heading: "Lora", body: "Inter", weights: [400, 500, 600, 700] },
+    ],
+  },
+  legal: {
+    professional: [
+      { heading: "Playfair Display", body: "Lora", weights: [400, 500, 600, 700] },
+      { heading: "Lora", body: "Source Sans Pro", weights: [400, 500, 600, 700] },
+    ],
+    trustworthy: [
+      { heading: "Lora", body: "Inter", weights: [400, 500, 600, 700] },
+      { heading: "Inter", body: "Inter", weights: [400, 500, 600, 700] },
+    ],
+  },
+  ecommerce: {
+    friendly: [
+      { heading: "Montserrat", body: "Open Sans", weights: [400, 500, 600, 700] },
+      { heading: "Poppins", body: "Inter", weights: [300, 400, 500, 600] },
+    ],
+    luxury: [
+      { heading: "Playfair Display", body: "Lora", weights: [400, 500, 600, 700] },
+      { heading: "Lora", body: "Source Sans Pro", weights: [400, 500, 600, 700] },
+    ],
+    playful: [
+      { heading: "Poppins", body: "Open Sans", weights: [400, 500, 600, 700] },
+      { heading: "Montserrat", body: "Inter", weights: [300, 400, 500, 600] },
+    ],
+  },
+}
+
+const colorSchemes = {
+  tech: {
+    professional: { primary: "#000000", secondary: "#374151", accent: "#f3f4f6", text: "#111827" },
+    innovative: { primary: "#1e293b", secondary: "#475569", accent: "#e2e8f0", text: "#0f172a" },
+    friendly: { primary: "#334155", secondary: "#64748b", accent: "#f1f5f9", text: "#1e293b" },
+  },
+  finance: {
+    professional: { primary: "#0f172a", secondary: "#1e293b", accent: "#f8fafc", text: "#020617" },
+    trustworthy: { primary: "#1e293b", secondary: "#334155", accent: "#f1f5f9", text: "#0f172a" },
+    luxury: { primary: "#000000", secondary: "#1f2937", accent: "#f9fafb", text: "#111827" },
+  },
+  healthcare: {
+    trustworthy: { primary: "#1e40af", secondary: "#3b82f6", accent: "#dbeafe", text: "#1e3a8a" },
+    professional: { primary: "#1d4ed8", secondary: "#3b82f6", accent: "#dbeafe", text: "#1e40af" },
+    friendly: { primary: "#0ea5e9", secondary: "#38bdf8", accent: "#e0f2fe", text: "#0c4a6e" },
+  },
+  creative: {
+    playful: { primary: "#ec4899", secondary: "#f472b6", accent: "#fce7f3", text: "#831843" },
+    innovative: { primary: "#7c3aed", secondary: "#a855f7", accent: "#f3e8ff", text: "#581c87" },
+    luxury: { primary: "#000000", secondary: "#374151", accent: "#f3f4f6", text: "#111827" },
+  },
+  legal: {
+    professional: { primary: "#0f172a", secondary: "#1e293b", accent: "#f8fafc", text: "#020617" },
+    trustworthy: { primary: "#1e40af", secondary: "#3b82f6", accent: "#dbeafe", text: "#1e3a8a" },
+  },
+  ecommerce: {
+    friendly: { primary: "#dc2626", secondary: "#ef4444", accent: "#fee2e2", text: "#991b1b" },
+    luxury: { primary: "#000000", secondary: "#374151", accent: "#f3f4f6", text: "#111827" },
+    playful: { primary: "#ec4899", secondary: "#f472b6", accent: "#fce7f3", text: "#831843" },
+  },
+}
+
+const recommendations = {
+  tech: {
+    professional:
+      "Technology companies benefit from clean, minimal typography and monochromatic color schemes. Black and grey tones convey reliability, precision, and technical expertise. This palette builds trust with enterprise clients while maintaining modern appeal.",
+    innovative:
+      "Forward-thinking tech companies can leverage darker greys with strategic accent colors. This approach suggests cutting-edge solutions while maintaining professional credibility. The typography should be modern and highly readable.",
+    friendly:
+      "Consumer-facing tech products benefit from approachable typography and softer grey tones. This creates accessibility while maintaining the technical authority users expect from technology brands.",
+  },
+  finance: {
+    professional:
+      "Financial services require the highest level of trust and credibility. Deep blacks and conservative greys with serif typography create immediate authority. This palette suggests stability and long-term thinking.",
+    trustworthy:
+      "Trust is paramount in finance. Monochromatic schemes with high contrast ensure clarity and accessibility. Clean typography reduces cognitive load when users are making important financial decisions.",
+    luxury:
+      "Premium financial services can leverage sophisticated black and grey palettes with subtle textures. This appeals to high-net-worth clients who expect refined, understated elegance.",
+  },
+  creative: {
+    playful:
+      "Creative agencies can push boundaries with bold color choices while maintaining sophisticated typography. This demonstrates creative capability while ensuring client confidence.",
+    innovative:
+      "Innovation-focused creative companies can leverage unique color combinations that showcase their forward-thinking approach while maintaining professional execution.",
+    luxury:
+      "High-end creative services benefit from sophisticated monochromatic palettes that let the work speak for itself. Restraint in color demonstrates confidence and refinement.",
+  },
+}
+
+const industryContent = {
+  tech: {
+    title: "Transform Your Digital Future",
+    subtitle: "Enterprise-grade technology solutions",
+    body: "We deliver cutting-edge technology solutions that drive business transformation and competitive advantage.",
+    cta: "Start Your Journey",
+  },
+  finance: {
+    title: "Secure Your Financial Future",
+    subtitle: "Trusted wealth management expertise",
+    body: "Professional financial planning and investment strategies designed for long-term wealth preservation and growth.",
+    cta: "Schedule Consultation",
+  },
+  healthcare: {
+    title: "Your Health, Our Priority",
+    subtitle: "Comprehensive healthcare excellence",
+    body: "Providing world-class healthcare services with a focus on patient outcomes and compassionate care.",
+    cta: "Book Appointment",
+  },
+  creative: {
+    title: "Bring Your Vision to Life",
+    subtitle: "Award-winning creative solutions",
+    body: "We create compelling brand experiences that resonate with your audience and drive meaningful engagement.",
+    cta: "View Our Work",
+  },
+  legal: {
+    title: "Trusted Legal Counsel",
+    subtitle: "Expert legal representation",
+    body: "Experienced attorneys providing comprehensive legal solutions with a focus on client success and protection.",
+    cta: "Get Legal Help",
+  },
+  ecommerce: {
+    title: "Premium Shopping Experience",
+    subtitle: "Curated products, exceptional service",
+    body: "Discover our carefully selected collection of premium products backed by unmatched customer service.",
+    cta: "Shop Collection",
+  },
+}
+
+// --- MAIN APP LOGIC ---
 document.addEventListener("DOMContentLoaded", () => {
   initializeApp()
   setupEventListeners()
@@ -9,16 +196,16 @@ document.addEventListener("DOMContentLoaded", () => {
 const AppState = {
   currentColors: {
     primary: "#000000",
-    secondary: "#6b7280", 
+    secondary: "#6b7280",
     accent: "#f3f4f6",
-    text: "#111827"
+    text: "#111827",
   },
   currentTypography: {
     heading: "Inter",
-    body: "Inter"
+    body: "Inter",
   },
   logoAnalysis: null,
-  isAnalyzing: false
+  isAnalyzing: false,
 }
 
 function initializeApp() {
@@ -29,10 +216,10 @@ function initializeApp() {
     setupAccessibilityChecker()
     setupLogoUpload()
     updatePreviewInRealTime()
-    console.log('Freestyler initialized successfully')
+    console.log("Freestyler initialized successfully")
   } catch (error) {
-    console.error('Error initializing app:', error)
-    showNotification('App initialization failed. Please refresh the page.', 'error')
+    console.error("Error initializing app:", error)
+    showNotification("App initialization failed. Please refresh the page.", "error")
   }
 }
 
@@ -43,20 +230,22 @@ function initializeTheme() {
   const body = document.body
 
   if (!themeToggle || !themeIcon || !themeText) {
-    console.warn('Theme toggle elements not found')
+    console.warn("Theme toggle elements not found")
     return
   }
 
   const savedTheme = localStorage.getItem("theme") || "light"
-  
+
   function updateTheme(isDark) {
     if (isDark) {
       body.setAttribute("data-theme", "dark")
-      themeIcon.innerHTML = '<path d="M12 3V1M12 23V21M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+      themeIcon.innerHTML =
+        '<path d="M12 3V1M12 23V21M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
       themeText.textContent = "Light"
     } else {
       body.removeAttribute("data-theme")
-      themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2"/>'
+      themeIcon.innerHTML =
+        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2"/>'
       themeText.textContent = "Dark"
     }
   }
@@ -77,13 +266,13 @@ function initializeColorInputs() {
     { color: "primaryColor", text: "primaryColorText", key: "primary" },
     { color: "secondaryColor", text: "secondaryColorText", key: "secondary" },
     { color: "accentColor", text: "accentColorText", key: "accent" },
-    { color: "textColor", text: "textColorText", key: "text" }
+    { color: "textColor", text: "textColorText", key: "text" },
   ]
 
   colorMappings.forEach(({ color, text, key }) => {
     const colorInput = document.getElementById(color)
     const textInput = document.getElementById(text)
-    
+
     if (colorInput && textInput) {
       colorInput.value = AppState.currentColors[key]
       textInput.value = AppState.currentColors[key]
@@ -97,7 +286,7 @@ function synchronizeColorInputs() {
     { color: "primaryColor", text: "primaryColorText", key: "primary" },
     { color: "secondaryColor", text: "secondaryColorText", key: "secondary" },
     { color: "accentColor", text: "accentColorText", key: "accent" },
-    { color: "textColor", text: "textColorText", key: "text" }
+    { color: "textColor", text: "textColorText", key: "text" },
   ]
 
   colorMappings.forEach(({ color, text, key }) => {
@@ -143,7 +332,7 @@ function setupLogoUpload() {
   const aiActions = document.getElementById("aiActions")
 
   if (!logoUploadArea || !logoInput) {
-    console.warn('Logo upload elements not found')
+    console.warn("Logo upload elements not found")
     return
   }
 
@@ -204,11 +393,14 @@ function setupLogoUpload() {
 
     const reader = new FileReader()
     reader.onload = (e) => {
-      if (logoImage) logoImage.src = e.target.result
+      if (logoImage) {
+        logoImage.src = e.target.result
+        logoImage.crossOrigin = "anonymous" // For canvas analysis
+      }
       if (uploadPlaceholder) uploadPlaceholder.style.display = "none"
       if (logoPreview) logoPreview.style.display = "block"
       if (aiActions) aiActions.style.display = "block"
-      
+
       performQuickAnalysis()
       showNotification("Logo uploaded! Click 'Analyze' for detailed analysis.", "success")
     }
@@ -218,10 +410,10 @@ function setupLogoUpload() {
   function performQuickAnalysis() {
     const styles = ["Modern", "Classic", "Minimalist", "Bold", "Elegant"]
     const personalities = ["Professional", "Creative", "Trustworthy", "Innovative", "Friendly"]
-    
+
     const logoStyle = document.getElementById("logoStyle")
     const brandPersonality = document.getElementById("brandPersonality")
-    
+
     if (logoStyle) logoStyle.textContent = styles[Math.floor(Math.random() * styles.length)]
     if (brandPersonality) brandPersonality.textContent = personalities[Math.floor(Math.random() * personalities.length)]
   }
@@ -238,52 +430,58 @@ function setupLogoUpload() {
 
 function performLogoAnalysis(imageElement) {
   if (AppState.isAnalyzing) return
-  
+
   AppState.isAnalyzing = true
   const analyzeBtn = document.getElementById("analyzeLogoBtn")
   const btnContent = analyzeBtn?.querySelector(".btn-content")
   const btnLoading = analyzeBtn?.querySelector(".btn-loading")
 
-  // Show loading state
   if (btnContent) btnContent.style.display = "none"
   if (btnLoading) btnLoading.style.display = "flex"
 
-  try {
-    // Real color analysis
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-    
-    canvas.width = imageElement.naturalWidth || imageElement.width
-    canvas.height = imageElement.naturalHeight || imageElement.height
-    ctx.drawImage(imageElement, 0, 0)
-    
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const analysis = analyzeImageColors(imageData.data)
-    
-    AppState.logoAnalysis = analysis
-    
-    // Apply generated palette
-    if (analysis.dominantColors.length > 0) {
-      applyLogoColors(analysis)
-    }
-    
-    // Show style variations
-    const styleVariations = document.getElementById("styleVariations")
-    if (styleVariations) styleVariations.style.display = "block"
-    
-    setTimeout(() => {
+  const img = new Image()
+  img.crossOrigin = "anonymous"
+  img.src = imageElement.src
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")
+
+      canvas.width = img.naturalWidth || img.width
+      canvas.height = img.naturalHeight || img.height
+      ctx.drawImage(img, 0, 0)
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const analysis = analyzeImageColors(imageData.data)
+
+      AppState.logoAnalysis = analysis
+
+      if (analysis.dominantColors.length > 0) {
+        applyLogoColors(analysis)
+      }
+
+      const styleVariations = document.getElementById("styleVariations")
+      if (styleVariations) styleVariations.style.display = "block"
+
+      setTimeout(() => {
+        AppState.isAnalyzing = false
+        if (btnContent) btnContent.style.display = "flex"
+        if (btnLoading) btnLoading.style.display = "none"
+        showNotification("Analysis complete! Colors extracted from your logo.", "success")
+      }, 1000)
+    } catch (error) {
+      console.error("Logo analysis error:", error)
       AppState.isAnalyzing = false
       if (btnContent) btnContent.style.display = "flex"
       if (btnLoading) btnLoading.style.display = "none"
-      showNotification("Analysis complete! Colors extracted from your logo.", "success")
-    }, 2000)
-    
-  } catch (error) {
-    console.error("Logo analysis error:", error)
+      showNotification("Could not analyze logo. This may be a CORS issue with the image.", "error")
+    }
+  }
+  img.onerror = () => {
     AppState.isAnalyzing = false
     if (btnContent) btnContent.style.display = "flex"
     if (btnLoading) btnLoading.style.display = "none"
-    showNotification("Could not analyze logo. Please try a different image.", "error")
+    showNotification("Could not load image for analysis.", "error")
   }
 }
 
@@ -293,7 +491,7 @@ function analyzeImageColors(imageData) {
   const minAlpha = 100
   const minSaturation = 10
 
-  for (let i = 0; i < imageData.length; i += (sampleRate * 4)) {
+  for (let i = 0; i < imageData.length; i += sampleRate * 4) {
     const r = imageData[i]
     const g = imageData[i + 1]
     const b = imageData[i + 2]
@@ -314,10 +512,10 @@ function analyzeImageColors(imageData) {
     .sort(([, a], [, b]) => b - a)
     .slice(0, 6)
     .map(([color]) => color)
-    .filter(color => color !== '#000000')
+    .filter((color) => color !== "#000000")
 
   if (sortedColors.length === 0) {
-    sortedColors.push('#000000')
+    sortedColors.push("#000000")
   }
 
   return {
@@ -325,40 +523,40 @@ function analyzeImageColors(imageData) {
     primaryColor: sortedColors[0] || "#000000",
     colorCount: sortedColors.length,
     isComplex: sortedColors.length > 3,
-    hasStrongBrand: sortedColors.length >= 2 && colorCounts[sortedColors[0]] > 100
+    hasStrongBrand: sortedColors.length >= 2 && colorCounts[sortedColors[0]] > 100,
   }
 }
 
 function clusterColor(hex) {
   const [h, s, l] = hexToHsl(hex)
-  
+
   const clusteredH = Math.round(h / 20) * 20
-  const clusteredS = Math.round(s / 25) * 25  
+  const clusteredS = Math.round(s / 25) * 25
   const clusteredL = Math.round(l / 15) * 15
-  
+
   return hslToHex(clusteredH % 360, Math.min(clusteredS, 100), Math.min(clusteredL, 100))
 }
 
 function applyLogoColors(analysis) {
   const { dominantColors } = analysis
-  
+
   if (dominantColors.length > 0) {
     const sortedByDarkness = dominantColors.sort((a, b) => {
       const [, , lA] = hexToHsl(a)
       const [, , lB] = hexToHsl(b)
       return lA - lB
     })
-    
+
     const primaryColor = sortedByDarkness[0]
     const palette = generateSmartPalette(primaryColor)
-    
+
     updateColorInput("primaryColor", "primaryColorText", palette.primary, "primary")
     updateColorInput("secondaryColor", "secondaryColorText", palette.secondary, "secondary")
     updateColorInput("accentColor", "accentColorText", palette.accent, "accent")
     updateColorInput("textColor", "textColorText", palette.text, "text")
-    
+
     updatePreviewInRealTime()
-    updateRecommendations(analysis)
+    updateFinalRecommendations(document.getElementById("industry").value, document.getElementById("positioning").value)
   }
 }
 
@@ -366,11 +564,11 @@ function generateSmartPalette(primaryColor) {
   if (!primaryColor || !isValidHex(primaryColor)) {
     primaryColor = "#000000"
   }
-  
+
   const [h, s, l] = hexToHsl(primaryColor)
-  
+
   let secondary, accent, text
-  
+
   if (l < 30) {
     secondary = hslToHex(h, Math.max(s - 20, 10), Math.min(l + 25, 70))
     accent = hslToHex(h, Math.max(s - 30, 5), Math.min(l + 50, 90))
@@ -384,46 +582,34 @@ function generateSmartPalette(primaryColor) {
     accent = hslToHex(h, Math.max(s - 25, 5), Math.min(l + 35, 90))
     text = l > 50 ? "#111827" : "#f8fafc"
   }
-  
-  return { 
-    primary: primaryColor, 
-    secondary, 
-    accent, 
-    text 
+
+  return {
+    primary: primaryColor,
+    secondary,
+    accent,
+    text,
   }
 }
 
 function updateColorInput(colorId, textId, value, key) {
   const colorInput = document.getElementById(colorId)
   const textInput = document.getElementById(textId)
-  
+
   if (!isValidHex(value)) {
     console.warn(`Invalid hex color: ${value}`)
     return
   }
-  
+
   if (colorInput) colorInput.value = value
   if (textInput) textInput.value = value
-  
+
   AppState.currentColors[key] = value
-  
+
   const harmonyKey = colorId.replace("Color", "").replace("core", "primary")
   updateColorHarmony(value, harmonyKey)
-  
+
   updateAccessibilityScore()
   updatePreviewInRealTime()
-}
-
-function updateRecommendations(analysis) {
-  const recommendationText = document.getElementById("recommendationText")
-  const confidenceScore = document.getElementById("confidenceScore")
-  
-  if (recommendationText && analysis) {
-    const confidence = Math.min(95, 70 + analysis.colorCount * 5)
-    if (confidenceScore) confidenceScore.textContent = `${confidence}%`
-    
-    recommendationText.textContent = `Analysis Complete: Extracted ${analysis.colorCount} brand colors from your logo. Generated professional palette optimized for your brand identity with ${confidence}% confidence.`
-  }
 }
 
 function setupEventListeners() {
@@ -439,11 +625,11 @@ function setupPreviewTabs() {
   const tabs = document.querySelectorAll(".preview-tab")
   const panels = document.querySelectorAll(".preview-panel")
 
-  tabs.forEach(tab => {
+  tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
-      tabs.forEach(t => t.classList.remove("active"))
-      panels.forEach(p => p.classList.remove("active"))
-      
+      tabs.forEach((t) => t.classList.remove("active"))
+      panels.forEach((p) => p.classList.remove("active"))
+
       tab.classList.add("active")
       const targetId = tab.dataset.tab
       const targetPanel = document.getElementById(targetId)
@@ -459,13 +645,13 @@ function setupGenerateButtons() {
   generateColorsBtn?.addEventListener("click", () => {
     const coreColor = AppState.currentColors.primary
     const palette = generateSmartPalette(coreColor)
-    
+
     Object.entries(palette).forEach(([key, value]) => {
       const colorId = key === "primary" ? "primaryColor" : `${key}Color`
       const textId = key === "primary" ? "primaryColorText" : `${key}ColorText`
       updateColorInput(colorId, textId, value, key)
     })
-    
+
     updateAccessibilityScore()
     updatePreviewInRealTime()
     showNotification("Smart color palette generated!", "success")
@@ -475,11 +661,11 @@ function setupGenerateButtons() {
     const industry = document.getElementById("industry")?.value || "tech"
     const positioning = document.getElementById("positioning")?.value || "professional"
     const pair = generateIntelligentTypographyPair(industry, positioning)
-    
+
     AppState.currentTypography = pair
     const coreFontSelect = document.getElementById("coreFont")
     if (coreFontSelect) coreFontSelect.value = pair.heading
-    
+
     updatePreviewInRealTime()
     showNotification(`Smart typography pair: ${pair.heading} + ${pair.body}`, "success")
   })
@@ -487,8 +673,8 @@ function setupGenerateButtons() {
 
 function setupTemplateSystem() {
   const buttons = document.querySelectorAll(".template-btn")
-  
-  buttons.forEach(btn => {
+
+  buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const template = btn.dataset.template
       applyTemplate(template)
@@ -497,78 +683,44 @@ function setupTemplateSystem() {
 }
 
 function applyTemplate(template) {
-  const templates = {
-    tech: {
-      industry: "tech",
-      positioning: "innovative", 
-      colors: { primary: "#1e293b", secondary: "#475569", accent: "#e2e8f0", text: "#0f172a" },
-      font: "Inter"
-    },
-    finance: {
-      industry: "finance",
-      positioning: "trustworthy",
-      colors: { primary: "#0f172a", secondary: "#1e293b", accent: "#f8fafc", text: "#020617" },
-      font: "Playfair Display"
-    },
-    creative: {
-      industry: "creative", 
-      positioning: "playful",
-      colors: { primary: "#7c3aed", secondary: "#a855f7", accent: "#f3e8ff", text: "#581c87" },
-      font: "Poppins"
-    }
+  const industry = template
+  const positioning =
+    {
+      tech: "innovative",
+      finance: "trustworthy",
+      creative: "playful",
+    }[template] || "professional"
+
+  const colorConfig = colorSchemes[industry]?.[positioning]
+  const typographyOptions = typographyPairs[industry]?.[positioning]
+
+  if (!colorConfig || !typographyOptions) {
+    showNotification(`Template '${template}' is not fully configured.`, "warning")
+    return
   }
-  
-  const config = templates[template]
-  if (!config) return
-  
-  const industrySelect = document.getElementById("industry")
-  const positioningSelect = document.getElementById("positioning")
-  const coreFontSelect = document.getElementById("coreFont")
-  
-  if (industrySelect) industrySelect.value = config.industry
-  if (positioningSelect) positioningSelect.value = config.positioning
-  if (coreFontSelect) coreFontSelect.value = config.font
-  
-  Object.entries(config.colors).forEach(([key, value]) => {
-    const colorId = key === "primary" ? "primaryColor" : `${key}Color`
-    const textId = key === "primary" ? "primaryColorText" : `${key}ColorText`
-    updateColorInput(colorId, textId, value, key)
-  })
-  
-  AppState.currentTypography.heading = config.font
-  AppState.currentTypography.body = config.font === "Playfair Display" ? "Inter" : config.font
-  
+
+  const typographyConfig = typographyOptions[0]
+
+  document.getElementById("industry").value = industry
+  document.getElementById("positioning").value = positioning
+  document.getElementById("coreFont").value = typographyConfig.heading
+
+  updateColorInput("primaryColor", "primaryColorText", colorConfig.primary, "primary")
+  updateColorInput("secondaryColor", "secondaryColorText", colorConfig.secondary, "secondary")
+  updateColorInput("accentColor", "accentColorText", colorConfig.accent, "accent")
+  updateColorInput("textColor", "textColorText", colorConfig.text, "text")
+
+  AppState.currentTypography.heading = typographyConfig.heading
+  AppState.currentTypography.body = typographyConfig.body
+
   updatePreviewInRealTime()
   showNotification(`${template.charAt(0).toUpperCase() + template.slice(1)} template applied!`, "success")
 }
 
 function generateIntelligentTypographyPair(industry, positioning) {
-  const pairs = {
-    tech: {
-      professional: { heading: "Inter", body: "Inter" },
-      innovative: { heading: "Poppins", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      trustworthy: { heading: "Inter", body: "Inter" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      luxury: { heading: "Playfair Display", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Inter" }
-    },
-    finance: {
-      professional: { heading: "Playfair Display", body: "Inter" },
-      trustworthy: { heading: "Lora", body: "Inter" },
-      luxury: { heading: "Playfair Display", body: "Lora" },
-      innovative: { heading: "Montserrat", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      playful: { heading: "Poppins", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Roboto" }
-    }
-  }
-  
-  const industryPairs = pairs[industry] || pairs.tech
-  const selectedPair = industryPairs[positioning] || industryPairs.professional
-  
+  const industryPairs = typographyPairs[industry] || typographyPairs.tech
+  const positionOptions = industryPairs[positioning] || industryPairs.professional
+  const selectedPair = positionOptions[Math.floor(Math.random() * positionOptions.length)]
   return selectedPair
 }
 
@@ -588,13 +740,13 @@ function setupExportButtons() {
 
   downloadPackageBtn?.addEventListener("click", () => {
     const css = generateComprehensiveCSS()
-    downloadFile(css, `stylecraft-pro-${Date.now()}.css`, "text/css")
+    downloadFile(css, `freestyler-guide-${Date.now()}.css`, "text/css")
     showNotification("CSS framework downloaded!", "success")
   })
 }
 
 function setupFormListeners() {
-  ["industry", "positioning", "fontScale", "coreFont"].forEach(id => {
+  ;["industry", "positioning", "fontScale", "coreFont"].forEach((id) => {
     const element = document.getElementById(id)
     element?.addEventListener("change", () => {
       updatePreviewInRealTime()
@@ -604,10 +756,10 @@ function setupFormListeners() {
 
 function setupStyleGuideGeneration() {
   const generateBtn = document.getElementById("generateBtn")
-  
+
   generateBtn?.addEventListener("click", () => {
     showLoadingState(generateBtn)
-    
+
     setTimeout(() => {
       generateCompleteStyleGuide()
       hideLoadingState(generateBtn)
@@ -619,34 +771,40 @@ function setupStyleGuideGeneration() {
 function generateCompleteStyleGuide() {
   const industry = document.getElementById("industry")?.value || "tech"
   const positioning = document.getElementById("positioning")?.value || "professional"
-  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
-  
+  const scale = Number.parseFloat(document.getElementById("fontScale")?.value || "1.25")
+
   updatePreviewContent(industry)
-  
-  const breakdown = generateStyleBreakdown(AppState.currentColors, AppState.currentTypography, industry, positioning, scale)
+
+  const breakdown = generateStyleBreakdown(
+    AppState.currentColors,
+    AppState.currentTypography,
+    industry,
+    positioning,
+    scale,
+  )
   displayBreakdown(breakdown)
-  
+
   updateFinalRecommendations(industry, positioning)
 }
 
 function updatePreviewInRealTime() {
-  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
-  
+  const scale = Number.parseFloat(document.getElementById("fontScale")?.value || "1.25")
+
   const root = document.documentElement
   root.style.setProperty("--accent-color", AppState.currentColors.primary)
   root.style.setProperty("--accent-hover", darkenColor(AppState.currentColors.primary, 10))
-  root.style.setProperty("--success-color", AppState.currentColors.accent)
+  root.style.setProperty("--accent-light", lightenColor(AppState.currentColors.primary, 90))
   root.style.setProperty("--text-primary", AppState.currentColors.text)
-  
+
   const preview = document.getElementById("previewContent")
   if (preview) {
     preview.style.fontFamily = `'${AppState.currentTypography.body}', sans-serif`
-    
-    const headings = preview.querySelectorAll("h1, h2, h3, h4, .nav-logo")
-    headings.forEach(heading => {
+
+    const headings = preview.querySelectorAll("h1, h2, h3, h4, .nav-logo, .nav-brand")
+    headings.forEach((heading) => {
       heading.style.fontFamily = `'${AppState.currentTypography.heading}', sans-serif`
     })
-    
+
     applyModularScale(preview, scale)
   }
 }
@@ -657,12 +815,12 @@ function applyModularScale(container, scale) {
     h1: Math.round(baseSize * Math.pow(scale, 3)),
     h2: Math.round(baseSize * Math.pow(scale, 2.5)),
     h3: Math.round(baseSize * Math.pow(scale, 2)),
-    h4: Math.round(baseSize * Math.pow(scale, 1.5))
+    h4: Math.round(baseSize * Math.pow(scale, 1.5)),
   }
-  
+
   Object.entries(sizes).forEach(([tag, size]) => {
     const elements = container.querySelectorAll(tag)
-    elements.forEach(el => {
+    elements.forEach((el) => {
       el.style.fontSize = `${size}px`
       el.style.lineHeight = size > 36 ? "1.1" : "1.2"
     })
@@ -686,37 +844,37 @@ function updateAccessibilityScore() {
     const bgColor = body.hasAttribute("data-theme") ? "#0f172a" : "#ffffff"
     const textColor = AppState.currentColors.text || "#111827"
     const primaryColor = AppState.currentColors.primary || "#000000"
-    
+
     const textContrast = calculateContrastRatio(bgColor, textColor)
     const primaryContrast = calculateContrastRatio(bgColor, primaryColor)
-    
+
     const scoreEl = document.getElementById("accessibilityScore")
     const ratioEl = document.getElementById("contrastRatio")
     const colorBlindEl = document.getElementById("colorBlindSafe")
     const printCompatibleEl = document.getElementById("printCompatible")
-    
+
     if (ratioEl) ratioEl.textContent = `${textContrast.toFixed(1)}:1`
-    
+
     let score = "AA"
     if (textContrast >= 7 && primaryContrast >= 4.5) score = "AAA"
     else if (textContrast < 4.5 || primaryContrast < 3) score = "Fail"
-    
+
     if (scoreEl) {
       scoreEl.textContent = score
       scoreEl.className = `accessibility-score ${score.toLowerCase()}`
     }
-    
+
     if (colorBlindEl) {
       const isColorBlindSafe = checkColorBlindSafety(textColor, primaryColor)
       colorBlindEl.textContent = isColorBlindSafe ? "✓ Yes" : "⚠ Review"
     }
-    
+
     if (printCompatibleEl) {
       const isPrintCompatible = checkPrintCompatibility(textColor, primaryColor)
       printCompatibleEl.textContent = isPrintCompatible ? "✓ Yes" : "⚠ Review"
     }
   } catch (error) {
-    console.error('Error updating accessibility score:', error)
+    console.error("Error updating accessibility score:", error)
   }
 }
 
@@ -733,7 +891,7 @@ function checkPrintCompatibility(textColor, primaryColor) {
 }
 
 function setupColorHarmony() {
-  Object.keys(AppState.currentColors).forEach(key => {
+  Object.keys(AppState.currentColors).forEach((key) => {
     const colorValue = AppState.currentColors[key]
     updateColorHarmony(colorValue, key)
   })
@@ -742,23 +900,23 @@ function setupColorHarmony() {
 function updateColorHarmony(color, prefix) {
   const harmonyEl = document.getElementById(`${prefix}Harmony`)
   if (!harmonyEl || !isValidHex(color)) return
-  
+
   const [h, s, l] = hexToHsl(color)
   const complementary = hslToHex((h + 180) % 360, s, l)
   const analogous1 = hslToHex((h + 30) % 360, s, l)
   const analogous2 = hslToHex((h - 30 + 360) % 360, s, l)
-  
+
   harmonyEl.style.background = `linear-gradient(90deg, ${color} 0%, ${analogous1} 33%, ${complementary} 66%, ${analogous2} 100%)`
 }
 
 function setupVariationButtons() {
   const buttons = document.querySelectorAll(".variation-btn")
-  
-  buttons.forEach(btn => {
+
+  buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      buttons.forEach(b => b.classList.remove("active"))
+      buttons.forEach((b) => b.classList.remove("active"))
       btn.classList.add("active")
-      
+
       const variation = btn.dataset.variation
       applyStyleVariation(variation)
     })
@@ -769,71 +927,65 @@ function applyStyleVariation(variation) {
   const variations = {
     conservative: { saturationMult: 0.7, lightnessAdj: 10 },
     balanced: { saturationMult: 1.0, lightnessAdj: 0 },
-    bold: { saturationMult: 1.3, lightnessAdj: -5 }
+    bold: { saturationMult: 1.3, lightnessAdj: -5 },
   }
-  
+
   const config = variations[variation]
   if (!config) return
-  
+
   const [h, s, l] = hexToHsl(AppState.currentColors.primary)
   const newS = Math.min(s * config.saturationMult, 100)
   const newL = Math.max(Math.min(l + config.lightnessAdj, 100), 0)
-  
+
   const adjustedColor = hslToHex(h, newS, newL)
   updateColorInput("primaryColor", "primaryColorText", adjustedColor, "primary")
-  
+
   updatePreviewInRealTime()
   showNotification(`Applied ${variation} style variation!`, "success")
 }
 
 function setupViewControls() {
   const viewBtns = document.querySelectorAll(".view-btn")
+  const previewContent = document.getElementById("previewContent")
 
-  viewBtns.forEach(btn => {
+  viewBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      viewBtns.forEach(b => b.classList.remove("active"))
+      viewBtns.forEach((b) => b.classList.remove("active"))
       btn.classList.add("active")
 
       const view = btn.dataset.view
-      applyViewMode(view)
+      if (!previewContent) return
+
+      previewContent.classList.remove("desktop-view", "mobile-view", "accessibility-view")
+
+      if (view === "mobile") {
+        previewContent.classList.add("mobile-view")
+      } else if (view === "accessibility") {
+        previewContent.classList.add("accessibility-view")
+      } else {
+        previewContent.classList.add("desktop-view")
+      }
     })
   })
 }
 
-function applyViewMode(view) {
-  const previewContent = document.getElementById("previewContent")
-  if (!previewContent) return
-
-  previewContent.classList.remove("desktop-view", "mobile-view", "accessibility-view")
-  previewContent.classList.add(`${view}-view`)
-
-  if (view === "mobile") {
-    previewContent.style.maxWidth = "375px"
-    previewContent.style.margin = "0 auto"
-  } else if (view === "accessibility") {
-    previewContent.style.filter = "contrast(1.5)"
-  } else {
-    previewContent.style.maxWidth = ""
-    previewContent.style.margin = ""
-    previewContent.style.filter = ""
-  }
-}
-
-// Utility Functions
+// --- UTILITY FUNCTIONS ---
 function rgbToHex(r, g, b) {
-  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()
 }
 
 function hexToHsl(hex) {
   if (!isValidHex(hex)) return [0, 0, 0]
-  
-  const r = parseInt(hex.slice(1, 3), 16) / 255
-  const g = parseInt(hex.slice(3, 5), 16) / 255
-  const b = parseInt(hex.slice(5, 7), 16) / 255
 
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  let h, s, l = (max + min) / 2
+  let r = Number.parseInt(hex.slice(1, 3), 16)
+  let g = Number.parseInt(hex.slice(3, 5), 16)
+  let b = Number.parseInt(hex.slice(5, 7), 16)
+  ;(r /= 255), (g /= 255), (b /= 255)
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b)
+  let h,
+    s,
+    l = (max + min) / 2
 
   if (max === min) {
     h = s = 0
@@ -841,9 +993,15 @@ function hexToHsl(hex) {
     const d = max - min
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break
-      case g: h = (b - r) / d + 2; break
-      case b: h = (r - g) / d + 4; break
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0)
+        break
+      case g:
+        h = (b - r) / d + 2
+        break
+      case b:
+        h = (r - g) / d + 4
+        break
     }
     h /= 6
   }
@@ -852,24 +1010,16 @@ function hexToHsl(hex) {
 }
 
 function hslToHex(h, s, l) {
-  h /= 360; s /= 100; l /= 100
-  const c = (1 - Math.abs(2 * l - 1)) * s
-  const x = c * (1 - Math.abs(((h * 6) % 2) - 1))
-  const m = l - c / 2
-  let r = 0, g = 0, b = 0
-
-  if (0 <= h && h < 1/6) { r = c; g = x; b = 0 }
-  else if (1/6 <= h && h < 1/3) { r = x; g = c; b = 0 }
-  else if (1/3 <= h && h < 1/2) { r = 0; g = c; b = x }
-  else if (1/2 <= h && h < 2/3) { r = 0; g = x; b = c }
-  else if (2/3 <= h && h < 5/6) { r = x; g = 0; b = c }
-  else if 5/6 <= h && h < 1) { r = c; g = 0; b = x }
-
-  r = Math.round((r + m) * 255)
-  g = Math.round((g + m) * 255)
-  b = Math.round((b + m) * 255)
-
-  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+  s /= 100
+  l /= 100
+  const k = (n) => (n + h / 30) % 12
+  const a = s * Math.min(l, 1 - l)
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1))
+  const toHex = (x) => {
+    const hex = Math.round(x * 255).toString(16)
+    return hex.length === 1 ? "0" + hex : hex
+  }
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`.toUpperCase()
 }
 
 function darkenColor(hex, percent) {
@@ -887,71 +1037,45 @@ function lightenColor(hex, percent) {
 function calculateContrastRatio(color1, color2) {
   const getLuminance = (hex) => {
     if (!isValidHex(hex)) return 0
-    
-    const r = parseInt(hex.slice(1, 3), 16) / 255
-    const g = parseInt(hex.slice(3, 5), 16) / 255
-    const b = parseInt(hex.slice(5, 7), 16) / 255
-    
-    const [rL, gL, bL] = [r, g, b].map(c => 
-      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
-    )
-    
+
+    const r = Number.parseInt(hex.slice(1, 3), 16) / 255
+    const g = Number.parseInt(hex.slice(3, 5), 16) / 255
+    const b = Number.parseInt(hex.slice(5, 7), 16) / 255
+
+    const [rL, gL, bL] = [r, g, b].map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)))
+
     return 0.2126 * rL + 0.7152 * gL + 0.0722 * bL
   }
-  
+
   const lum1 = getLuminance(color1)
   const lum2 = getLuminance(color2)
   const brightest = Math.max(lum1, lum2)
   const darkest = Math.min(lum1, lum2)
-  
+
   return (brightest + 0.05) / (darkest + 0.05)
 }
 
 function showNotification(message, type = "success") {
+  const existing = document.querySelector(".notification")
+  if (existing) existing.remove()
+
   const notification = document.createElement("div")
   notification.className = `notification ${type}`
-  
-  const colors = {
-    success: "#059669",
-    error: "#dc2626", 
-    warning: "#d97706",
-    info: "#0ea5e9"
-  }
-  
+
   const icons = {
     success: "✓",
-    error: "✗", 
+    error: "✗",
     warning: "⚠",
-    info: "ℹ"
+    info: "ℹ",
   }
-  
-  notification.style.cssText = `
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    padding: 16px 24px;
-    background: ${colors[type]};
-    color: white;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 14px;
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  `
-  
+
   notification.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`
   document.body.appendChild(notification)
-  
-  setTimeout(() => notification.style.transform = "translateX(0)", 100)
-  
+
+  setTimeout(() => (notification.style.transform = "translateX(0)"), 10)
+
   setTimeout(() => {
-    notification.style.transform = "translateX(100%)"
+    notification.style.transform = "translateX(120%)"
     setTimeout(() => {
       if (document.body.contains(notification)) {
         document.body.removeChild(notification)
@@ -966,6 +1090,7 @@ function showLoadingState(button) {
   const loading = button.querySelector(".btn-loading")
   if (content) content.style.display = "none"
   if (loading) loading.style.display = "flex"
+  button.disabled = true
 }
 
 function hideLoadingState(button) {
@@ -974,13 +1099,14 @@ function hideLoadingState(button) {
   const loading = button.querySelector(".btn-loading")
   if (content) content.style.display = "flex"
   if (loading) loading.style.display = "none"
+  button.disabled = false
 }
 
 function generateComprehensiveCSS() {
   const colors = AppState.currentColors
   const typography = AppState.currentTypography
-  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
-  
+  const scale = Number.parseFloat(document.getElementById("fontScale")?.value || "1.25")
+
   const baseSize = 16
   const sizes = {
     h1: Math.round(baseSize * Math.pow(scale, 3)),
@@ -988,78 +1114,69 @@ function generateComprehensiveCSS() {
     h3: Math.round(baseSize * Math.pow(scale, 2)),
     h4: Math.round(baseSize * Math.pow(scale, 1.5)),
     h5: Math.round(baseSize * Math.pow(scale, 1)),
-    h6: Math.round(baseSize * Math.pow(scale, 0.5))
+    h6: Math.round(baseSize * Math.pow(scale, 0.5)),
   }
 
-  return `/* StyleCraft Pro - Generated Design System */
-/* Generated: ${new Date().toLocaleDateString()} */
+  return `/* Freestyler - Generated Design System */
+/* Generated: ${new Date().toLocaleString()} */
 
 :root {
-  /* Brand Colors */
-  --brand-primary: ${colors.primary};
-  --brand-secondary: ${colors.secondary};
-  --brand-accent: ${colors.accent};
-  --brand-text: ${colors.text};
-  
-  /* Extended Palette */
-  --color-primary-50: ${lightenColor(colors.primary, 95)};
-  --color-primary-100: ${lightenColor(colors.primary, 90)};
-  --color-primary-500: ${colors.primary};
-  --color-primary-600: ${darkenColor(colors.primary, 10)};
-  --color-primary-700: ${darkenColor(colors.primary, 20)};
-  --color-primary-900: ${darkenColor(colors.primary, 40)};
-  
-  /* Typography */
-  --font-family-heading: '${typography.heading}', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-family-body: '${typography.body}', -apple-system, BlinkMacSystemFont, sans-serif;
-  
-  /* Font Scale */
-  --font-scale: ${scale};
-  --font-size-h1: ${sizes.h1}px;
-  --font-size-h2: ${sizes.h2}px;
-  --font-size-h3: ${sizes.h3}px;
-  --font-size-h4: ${sizes.h4}px;
-  --font-size-h5: ${sizes.h5}px;
-  --font-size-h6: ${sizes.h6}px;
-  --font-size-base: ${baseSize}px;
-  
-  /* Spacing */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  
-  /* Border Radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-full: 9999px;
+/* Brand Colors */
+--brand-primary: ${colors.primary};
+--brand-secondary: ${colors.secondary};
+--brand-accent: ${colors.accent};
+--brand-text: ${colors.text};
+
+/* Extended Palette */
+--color-primary-50: ${lightenColor(colors.primary, 95)};
+--color-primary-100: ${lightenColor(colors.primary, 90)};
+--color-primary-500: ${colors.primary};
+--color-primary-600: ${darkenColor(colors.primary, 10)};
+--color-primary-700: ${darkenColor(colors.primary, 20)};
+--color-primary-900: ${darkenColor(colors.primary, 40)};
+
+/* Typography */
+--font-family-heading: '${typography.heading}', -apple-system, BlinkMacSystemFont, sans-serif;
+--font-family-body: '${typography.body}', -apple-system, BlinkMacSystemFont, sans-serif;
+
+/* Font Scale */
+--font-scale: ${scale};
+--font-size-h1: ${sizes.h1}px;
+--font-size-h2: ${sizes.h2}px;
+--font-size-h3: ${sizes.h3}px;
+--font-size-h4: ${sizes.h4}px;
+--font-size-h5: ${sizes.h5}px;
+--font-size-h6: ${sizes.h6}px;
+--font-size-base: ${baseSize}px;
+
+/* Spacing */
+--space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+--space-6: 1.5rem; --space-8: 2rem; --space-12: 3rem; --space-16: 4rem;
+
+/* Shadows */
+--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+/* Border Radius */
+--radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+--radius-xl: 1rem; --radius-full: 9999px;
 }
 
 /* Base Typography */
 body {
-  font-family: var(--font-family-body);
-  color: var(--brand-text);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+font-family: var(--font-family-body);
+color: var(--brand-text);
+line-height: 1.6;
+-webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-heading);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--brand-text);
-  margin-bottom: var(--space-4);
+font-family: var(--font-family-heading);
+font-weight: 700;
+line-height: 1.2;
+color: var(--brand-text);
+margin-bottom: var(--space-4);
 }
 
 h1 { font-size: var(--font-size-h1); }
@@ -1071,106 +1188,50 @@ h6 { font-size: var(--font-size-h6); }
 
 /* Button System */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-6);
-  font-weight: 600;
-  border-radius: var(--radius-lg);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
+display: inline-flex; align-items: center; gap: var(--space-2);
+padding: var(--space-3) var(--space-6); font-weight: 600;
+border-radius: var(--radius-lg); border: 1px solid transparent;
+cursor: pointer; transition: all 0.2s; text-decoration: none;
 }
-
 .btn-primary {
-  background-color: var(--brand-primary);
-  color: var(--color-primary-50);
-  box-shadow: var(--shadow-sm);
+background-color: var(--brand-primary); color: var(--color-primary-50);
+box-shadow: var(--shadow-sm);
 }
-
 .btn-primary:hover {
-  background-color: var(--color-primary-600);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+background-color: var(--color-primary-600); transform: translateY(-1px);
+box-shadow: var(--shadow-md);
 }
-
 .btn-secondary {
-  background-color: transparent;
-  color: var(--brand-primary);
-  border-color: var(--brand-primary);
+background-color: transparent; color: var(--brand-primary);
+border-color: var(--brand-primary);
 }
-
 .btn-secondary:hover {
-  background-color: var(--brand-primary);
-  color: var(--color-primary-50);
+background-color: var(--brand-primary); color: var(--color-primary-50);
 }
 
 /* Card System */
 .card {
-  background: white;
-  border: 1px solid var(--brand-accent);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  transition: all 0.2s;
+background: white; border: 1px solid var(--brand-accent);
+border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);
+overflow: hidden; transition: all 0.2s;
 }
-
 .card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+box-shadow: var(--shadow-lg); transform: translateY(-2px);
 }
-
-.card-header {
-  padding: var(--space-6);
-  border-bottom: 1px solid var(--brand-accent);
-}
-
-.card-body {
-  padding: var(--space-6);
-}
+.card-header { padding: var(--space-6); border-bottom: 1px solid var(--brand-accent); }
+.card-body { padding: var(--space-6); }
 
 /* Form Elements */
-.form-input,
-.form-select,
-.form-textarea {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--brand-accent);
-  border-radius: var(--radius-lg);
-  font-family: inherit;
-  transition: border-color 0.2s;
+.form-input, .form-select, .form-textarea {
+width: 100%; padding: var(--space-3) var(--space-4);
+border: 1px solid var(--brand-accent); border-radius: var(--radius-lg);
+font-family: inherit; transition: border-color 0.2s;
 }
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  outline: none;
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+outline: none; border-color: var(--brand-primary);
+box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
-
-/* Utility Classes */
-.text-primary { color: var(--brand-primary); }
-.text-secondary { color: var(--brand-secondary); }
-.bg-primary { background-color: var(--brand-primary); }
-.bg-accent { background-color: var(--brand-accent); }
-
-.shadow-sm { box-shadow: var(--shadow-sm); }
-.shadow-md { box-shadow: var(--shadow-md); }
-.shadow-lg { box-shadow: var(--shadow-lg); }
-
-.rounded-sm { border-radius: var(--radius-sm); }
-.rounded-md { border-radius: var(--radius-md); }
-.rounded-lg { border-radius: var(--radius-lg); }
-.rounded-xl { border-radius: var(--radius-xl); }
-
-/* Responsive Typography */
-@media (max-width: 768px) {
-  h1 { font-size: calc(var(--font-size-h1) * 0.8); }
-  h2 { font-size: calc(var(--font-size-h2) * 0.85); }
-  h3 { font-size: calc(var(--font-size-h3) * 0.9); }
-}`
+`
 }
 
 function downloadFile(content, filename, type) {
@@ -1187,72 +1248,71 @@ function downloadFile(content, filename, type) {
 
 function generateStyleBreakdown(colors, typography, industry, positioning, scale) {
   const [h, s, l] = hexToHsl(colors.primary)
-  
+
+  const colorPsychologyText = {
+    black: "conveys authority, sophistication, and premium quality",
+    grey: "suggests professionalism, neutrality, and timeless elegance",
+    blue: "communicates trust, stability, and corporate reliability",
+    red: "expresses energy, urgency, and bold confidence",
+    green: "symbolizes growth, prosperity, and natural harmony",
+    purple: "indicates luxury, creativity, and innovative thinking",
+  }
+
+  let dominantColor = "grey"
+  if (l < 20) dominantColor = "black"
+  else if (h >= 180 && h < 240) dominantColor = "blue"
+  else if (h >= 330 || h < 30) dominantColor = "red"
+  else if (h >= 100 && h < 160) dominantColor = "green"
+  else if (h >= 260 && h < 310) dominantColor = "purple"
+
   return [
     {
       title: "Color Psychology Analysis",
-      description: `Your primary color has ${Math.round(s)}% saturation and ${Math.round(l)}% lightness, creating ${s > 50 ? "vibrant, energetic" : "sophisticated, professional"} brand presence perfect for ${industry} companies.`
+      description: `Your primary color ${colorPsychologyText[dominantColor] || "is versatile"}, strategically chosen for ${industry} companies. The saturation of ${Math.round(s)}% creates a ${s > 50 ? "vibrant, energetic" : "sophisticated, professional"} brand presence.`,
     },
     {
       title: "Typography Pairing",
-      description: `${typography.heading} and ${typography.body} combination enhances readability and brand perception, optimized for ${positioning} positioning in the ${industry} sector.`
+      description: `${typography.heading} and ${typography.body} combination enhances readability and brand perception, optimized for ${positioning} positioning in the ${industry} sector.`,
     },
     {
       title: "Mathematical Scale",
-      description: `${scale} modular scale creates harmonious proportions with ${Math.round((scale - 1) * 100)}% size progression, ensuring consistent visual hierarchy.`
+      description: `A ${scale} modular scale creates harmonious proportions with a ${Math.round((scale - 1) * 100)}% size progression, ensuring consistent visual hierarchy.`,
     },
     {
       title: "Accessibility Compliance",
-      description: `Color combinations meet WCAG AA standards with proper contrast ratios, ensuring your design is accessible to all users including those with visual impairments.`
-    }
+      description: `Color combinations meet WCAG AA standards with proper contrast ratios, ensuring your design is accessible to all users.`,
+    },
   ]
 }
 
 function displayBreakdown(breakdown) {
   const section = document.getElementById("breakdownSection")
   const content = document.getElementById("breakdownContent")
-  
+
   if (content) {
-    content.innerHTML = breakdown.map(item => `
-      <div class="breakdown-item">
-        <h5>${item.title}</h5>
-        <p>${item.description}</p>
-      </div>
-    `).join("")
+    content.innerHTML = breakdown
+      .map(
+        (item) => `
+    <div class="breakdown-item">
+      <h5>${item.title}</h5>
+      <p>${item.description}</p>
+    </div>
+  `,
+      )
+      .join("")
   }
-  
+
   if (section) section.style.display = "block"
 }
 
 function updatePreviewContent(industry) {
-  const content = {
-    tech: {
-      title: "Transform Your Digital Future",
-      subtitle: "Enterprise-grade technology solutions",
-      body: "We deliver cutting-edge technology solutions that drive business transformation.",
-      cta: "Start Innovation"
-    },
-    finance: {
-      title: "Secure Your Financial Future", 
-      subtitle: "Trusted wealth management expertise",
-      body: "Professional financial planning and investment strategies for long-term growth.",
-      cta: "Schedule Consultation"
-    },
-    creative: {
-      title: "Bring Your Vision to Life",
-      subtitle: "Award-winning creative solutions", 
-      body: "We create compelling brand experiences that resonate and drive engagement.",
-      cta: "View Portfolio"
-    }
-  }
-  
-  const selected = content[industry] || content.tech
-  
+  const selected = industryContent[industry] || industryContent.tech
+
   const heroTitle = document.querySelector("#hero h1")
   const heroSubtitle = document.querySelector("#hero .subtitle")
   const heroBody = document.querySelector("#hero .body-text")
   const heroCta = document.querySelector("#hero .cta-button.primary")
-  
+
   if (heroTitle) heroTitle.textContent = selected.title
   if (heroSubtitle) heroSubtitle.textContent = selected.subtitle
   if (heroBody) heroBody.textContent = selected.body
@@ -1262,33 +1322,47 @@ function updatePreviewContent(industry) {
 function updateFinalRecommendations(industry, positioning) {
   const recommendationText = document.getElementById("recommendationText")
   const confidenceScore = document.getElementById("confidenceScore")
-  
+  const recommendationTags = document.getElementById("recommendationTags")
+
   const confidence = calculateConfidence(industry, positioning)
-  
+  const recommendation =
+    recommendations[industry]?.[positioning] ||
+    "Your generated style guide provides a solid foundation for your brand's visual identity."
+
   if (confidenceScore) confidenceScore.textContent = `${confidence}%`
   if (recommendationText) {
-    recommendationText.textContent = `Professional style guide complete! Your ${positioning} ${industry} brand achieves ${confidence}% design alignment with industry best practices.`
+    recommendationText.textContent = recommendation
+  }
+  if (recommendationTags) {
+    const tags = {
+      tech: ["#Innovation", "#Scalability", "#UX"],
+      finance: ["#Trust", "#Security", "#Clarity"],
+      creative: ["#Boldness", "#Storytelling", "#Engagement"],
+    }
+    recommendationTags.innerHTML = (tags[industry] || [])
+      .map((tag) => `<span class="recommendation-tag">${tag}</span>`)
+      .join("")
   }
 }
 
 function calculateConfidence(industry, positioning) {
   let score = 85
-  
+
   const industryBonus = {
     tech: 5,
     finance: 8,
     creative: 3,
-    healthcare: 7
+    healthcare: 7,
   }
-  
+
   score += industryBonus[industry] || 0
-  
+
   if (AppState.logoAnalysis) score += 8
-  
+
   return Math.min(score, 98)
 }
 
-// Error handling
+// --- ERROR HANDLING ---
 window.addEventListener("error", (event) => {
   console.error("Application error:", event.error)
   showNotification("An unexpected error occurred. Please try again.", "error")
@@ -1299,12 +1373,3 @@ window.addEventListener("unhandledrejection", (event) => {
   showNotification("An error occurred while processing your request.", "error")
   event.preventDefault()
 })
-
-// Initialize the application when everything is loaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('StyleCraft Pro initialized successfully')
-  })
-} else {
-  console.log('StyleCraft Pro initialized successfully')
-}
