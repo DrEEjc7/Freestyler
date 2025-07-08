@@ -1,817 +1,4 @@
-friendly: { heading: "Montserrat", body: "Open Sans" },
-      luxury: { heading: "Playfair Display", body: "Lora" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      professional: { heading: "Inter", body: "Inter" },
-      trustworthy: { heading: "Lora", body: "Inter" },
-      innovative: { heading: "Montserrat", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Roboto" }
-    },
-    consulting: {
-      professional: { heading: "Playfair Display", body: "Inter" },
-      trustworthy: { heading: "Lora", body: "Inter" },
-      luxury: { heading: "Playfair Display", body: "Lora" },
-      innovative: { heading: "Montserrat", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      playful: { heading: "Poppins", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Roboto" }
-    },
-    education: {
-      professional: { heading: "Lora", body: "Inter" },
-      trustworthy: { heading: "Source Sans Pro", body: "Source Sans Pro" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      innovative: { heading: "Poppins", body: "Inter" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      luxury: { heading: "Playfair Display", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Inter" }
-    },
-    nonprofit: {
-      trustworthy: { heading: "Lora", body: "Inter" },
-      friendly: { heading: "Open Sans", body: "Open Sans" },
-      professional: { heading: "Source Sans Pro", body: "Source Sans Pro" },
-      innovative: { heading: "Poppins", body: "Inter" },
-      playful: { heading: "Poppins", body: "Open Sans" },
-      luxury: { heading: "Playfair Display", body: "Inter" },
-      minimalist: { heading: "Inter", body: "Inter" },
-      bold: { heading: "Montserrat", body: "Inter" }
-    }
-  }
-  
-  // Get the specific pair or fallback to a safe default
-  const industryPairs = pairs[industry]
-  if (!industryPairs) {
-    return { heading: "Inter", body: "Inter" }
-  }
-  
-  const selectedPair = industryPairs[positioning]
-  if (!selectedPair) {
-    // Fallback to the first available pair for the industry
-    const firstKey = Object.keys(industryPairs)[0]
-    return industryPairs[firstKey] || { heading: "Inter", body: "Inter" }
-  }
-  
-  return selectedPair
-}
-
-function setupExportButtons() {
-  document.getElementById("copyCssBtn")?.addEventListener("click", async () => {
-    const css = generateComprehensiveCSS()
-    try {
-      await navigator.clipboard.writeText(css)
-      showNotification("Complete CSS framework copied to clipboard!", "success")
-    } catch (err) {
-      showNotification("Failed to copy CSS", "error")
-    }
-  })
-
-  document.getElementById("downloadPackageBtn")?.addEventListener("click", () => {
-    const css = generateComprehensiveCSS()
-    downloadFile(css, `stylecraft-pro-${Date.now()}.css`, "text/css")
-    showNotification("CSS framework downloaded!", "success")
-  })
-}
-
-function setupFormListeners() {
-  // Industry and positioning changes
-  ["industry", "positioning", "fontScale", "coreFont"].forEach(id => {
-    document.getElementById(id)?.addEventListener("change", () => {
-      updatePreviewInRealTime()
-    })
-  })
-}
-
-function setupStyleGuideGeneration() {
-  const generateBtn = document.getElementById("generateBtn")
-  
-  generateBtn?.addEventListener("click", () => {
-    showLoadingState(generateBtn)
-    
-    setTimeout(() => {
-      generateCompleteStyleGuide()
-      hideLoadingState(generateBtn)
-      showNotification("Professional style guide generated!", "success")
-    }, 1500)
-  })
-}
-
-function generateCompleteStyleGuide() {
-  const industry = document.getElementById("industry").value
-  const positioning = document.getElementById("positioning").value
-  const scale = parseFloat(document.getElementById("fontScale").value)
-  
-  // Update content based on industry
-  updatePreviewContent(industry)
-  
-  // Generate breakdown
-  const breakdown = generateStyleBreakdown(AppState.currentColors, AppState.currentTypography, industry, positioning, scale)
-  displayBreakdown(breakdown)
-  
-  // Update final recommendations
-  updateFinalRecommendations(industry, positioning)
-}
-
-function updatePreviewInRealTime() {
-  const scale = parseFloat(document.getElementById("fontScale").value || "1.25")
-  
-  // Apply colors to CSS variables
-  const root = document.documentElement
-  root.style.setProperty("--accent-color", AppState.currentColors.primary)
-  root.style.setProperty("--accent-hover", darkenColor(AppState.currentColors.primary, 10))
-  root.style.setProperty("--success-color", AppState.currentColors.accent)
-  root.style.setProperty("--text-primary", AppState.currentColors.text)
-  
-  // Apply typography
-  const preview = document.getElementById("previewContent")
-  if (preview) {
-    preview.style.fontFamily = `'${AppState.currentTypography.body}', sans-serif`
-    
-    const headings = preview.querySelectorAll("h1, h2, h3, h4, .nav-logo")
-    headings.forEach(heading => {
-      heading.style.fontFamily = `'${AppState.currentTypography.heading}', sans-serif`
-    })
-    
-    // Apply font sizes based on scale
-    applyModularScale(preview, scale)
-  }
-}
-
-function applyModularScale(container, scale) {
-  const baseSize = 16
-  const sizes = {
-    h1: Math.round(baseSize * Math.pow(scale, 3)),
-    h2: Math.round(baseSize * Math.pow(scale, 2.5)),
-    h3: Math.round(baseSize * Math.pow(scale, 2)),
-    h4: Math.round(baseSize * Math.pow(scale, 1.5))
-  }
-  
-  Object.entries(sizes).forEach(([tag, size]) => {
-    const elements = container.querySelectorAll(tag)
-    elements.forEach(el => {
-      el.style.fontSize = `${size}px`
-      el.style.lineHeight = size > 36 ? "1.1" : "1.2"
-    })
-  })
-}
-
-function setupEnhancedFeatures() {
-  setupAccessibilityChecker()
-  setupColorHarmony()
-  setupVariationButtons()
-  setupOnboarding()
-  setupViewControls()
-}
-
-function setupAccessibilityChecker() {
-  updateAccessibilityScore()
-}
-
-function updateAccessibilityScore() {
-  const body = document.body
-  const bgColor = body.hasAttribute("data-theme") ? "#0f172a" : "#ffffff"
-  const textColor = AppState.currentColors.text || "#111827"
-  const primaryColor = AppState.currentColors.primary || "#000000"
-  
-  const textContrast = calculateContrastRatio(bgColor, textColor)
-  const primaryContrast = calculateContrastRatio(bgColor, primaryColor)
-  
-  // Update UI elements safely
-  const scoreEl = document.getElementById("accessibilityScore")
-  const ratioEl = document.getElementById("contrastRatio")
-  const colorBlindEl = document.getElementById("colorBlindSafe")
-  const printCompatibleEl = document.getElementById("printCompatible")
-  
-  if (ratioEl) ratioEl.textContent = `${textContrast.toFixed(1)}:1`
-  
-  let score = "AA"
-  if (textContrast >= 7 && primaryContrast >= 4.5) score = "AAA"
-  else if (textContrast < 4.5 || primaryContrast < 3) score = "Fail"
-  
-  if (scoreEl) {
-    scoreEl.textContent = score
-    scoreEl.className = `accessibility-score ${score.toLowerCase()}`
-  }
-  
-  // Update additional accessibility info
-  if (colorBlindEl) {
-    const isColorBlindSafe = checkColorBlindSafety(textColor, primaryColor)
-    colorBlindEl.textContent = isColorBlindSafe ? "✓ Yes" : "⚠ Review"
-  }
-  
-  if (printCompatibleEl) {
-    const isPrintCompatible = checkPrintCompatibility(textColor, primaryColor)
-    printCompatibleEl.textContent = isPrintCompatible ? "✓ Yes" : "⚠ Review"
-  }
-}
-
-function checkColorBlindSafety(textColor, primaryColor) {
-  // Simple check - in a real implementation, you'd use more sophisticated algorithms
-  const textContrast = calculateContrastRatio("#ffffff", textColor)
-  const primaryContrast = calculateContrastRatio("#ffffff", primaryColor)
-  return textContrast >= 3 && primaryContrast >= 3
-}
-
-function checkPrintCompatibility(textColor, primaryColor) {
-  // Check if colors work well in print (high contrast, not too light)
-  const [, , textL] = hexToHsl(textColor)
-  const [, , primaryL] = hexToHsl(primaryColor)
-  return textL < 80 && primaryL < 90 // Not too light for print
-}
-
-function setupColorHarmony() {
-  // Initialize harmony indicators for existing colors
-  Object.keys(AppState.currentColors).forEach(key => {
-    const colorValue = AppState.currentColors[key]
-    updateColorHarmony(colorValue, key)
-  })
-}
-
-function updateColorHarmony(color, prefix) {
-  const harmonyEl = document.getElementById(`${prefix}Harmony`)
-  if (!harmonyEl) return
-  
-  const [h, s, l] = hexToHsl(color)
-  const complementary = hslToHex((h + 180) % 360, s, l)
-  const analogous1 = hslToHex((h + 30) % 360, s, l)
-  const analogous2 = hslToHex((h - 30 + 360) % 360, s, l)
-  
-  harmonyEl.style.background = `linear-gradient(90deg, ${color} 0%, ${analogous1} 33%, ${complementary} 66%, ${analogous2} 100%)`
-}
-
-function setupVariationButtons() {
-  const buttons = document.querySelectorAll(".variation-btn")
-  
-  buttons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      buttons.forEach(b => b.classList.remove("active"))
-      btn.classList.add("active")
-      
-      const variation = btn.dataset.variation
-      applyStyleVariation(variation)
-    })
-  })
-}
-
-function applyStyleVariation(variation) {
-  const variations = {
-    conservative: { saturationMult: 0.7, lightnessAdj: 10 },
-    balanced: { saturationMult: 1.0, lightnessAdj: 0 },
-    bold: { saturationMult: 1.3, lightnessAdj: -5 }
-  }
-  
-  const config = variations[variation]
-  if (!config) return
-  
-  const [h, s, l] = hexToHsl(AppState.currentColors.primary)
-  const newS = Math.min(s * config.saturationMult, 100)
-  const newL = Math.max(Math.min(l + config.lightnessAdj, 100), 0)
-  
-  const adjustedColor = hslToHex(h, newS, newL)
-  updateColorInput("primaryColor", "primaryColorText", adjustedColor, "primary")
-  
-  updatePreviewInRealTime()
-  showNotification(`Applied ${variation} style variation!`, "success")
-}
-
-function setupOnboarding() {
-  const overlay = document.getElementById("onboardingOverlay")
-  const startBtn = document.getElementById("startOnboarding")
-  const skipBtn = document.getElementById("skipOnboarding")
-  
-  startBtn?.addEventListener("click", () => {
-    hideOnboarding()
-    document.getElementById("logoUploadArea")?.scrollIntoView({ behavior: "smooth" })
-    showNotification("Upload your logo to get started with analysis!", "info")
-  })
-  
-  skipBtn?.addEventListener("click", hideOnboarding)
-}
-
-function showOnboarding() {
-  document.getElementById("onboardingOverlay")?.classList.add("active")
-}
-
-function hideOnboarding() {
-  document.getElementById("onboardingOverlay")?.classList.remove("active")
-  localStorage.setItem("stylecraft-visited", "true")
-}
-
-function setupViewControls() {
-  const viewBtns = document.querySelectorAll(".view-btn")
-
-  viewBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      viewBtns.forEach(b => b.classList.remove("active"))
-      btn.classList.add("active")
-
-      const view = btn.dataset.view
-      applyViewMode(view)
-    })
-  })
-}
-
-function applyViewMode(view) {
-  const previewContent = document.getElementById("previewContent")
-
-  // Remove existing view classes
-  previewContent.classList.remove("desktop-view", "mobile-view", "accessibility-view")
-
-  // Add new view class
-  previewContent.classList.add(`${view}-view`)
-
-  if (view === "mobile") {
-    previewContent.style.maxWidth = "375px"
-    previewContent.style.margin = "0 auto"
-  } else if (view === "accessibility") {
-    // Apply high contrast mode
-    previewContent.style.filter = "contrast(1.5)"
-  } else {
-    previewContent.style.maxWidth = ""
-    previewContent.style.margin = ""
-    previewContent.style.filter = ""
-  }
-}
-
-// Utility Functions
-function rgbToHex(r, g, b) {
-  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
-}
-
-function hexToHsl(hex) {
-  const r = parseInt(hex.slice(1, 3), 16) / 255
-  const g = parseInt(hex.slice(3, 5), 16) / 255
-  const b = parseInt(hex.slice(5, 7), 16) / 255
-
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  let h, s, l = (max + min) / 2
-
-  if (max === min) {
-    h = s = 0
-  } else {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break
-      case g: h = (b - r) / d + 2; break
-      case b: h = (r - g) / d + 4; break
-    }
-    h /= 6
-  }
-
-  return [h * 360, s * 100, l * 100]
-}
-
-function hslToHex(h, s, l) {
-  h /= 360; s /= 100; l /= 100
-  const c = (1 - Math.abs(2 * l - 1)) * s
-  const x = c * (1 - Math.abs(((h * 6) % 2) - 1))
-  const m = l - c / 2
-  let r = 0, g = 0, b = 0
-
-  if (0 <= h && h < 1/6) { r = c; g = x; b = 0 }
-  else if (1/6 <= h && h < 1/3) { r = x; g = c; b = 0 }
-  else if (1/3 <= h && h < 1/2) { r = 0; g = c; b = x }
-  else if (1/2 <= h && h < 2/3) { r = 0; g = x; b = c }
-  else if (2/3 <= h && h < 5/6) { r = x; g = 0; b = c }
-  else if 5/6 <= h && h < 1) { r = c; g = 0; b = x }
-
-  r = Math.round((r + m) * 255)
-  g = Math.round((g + m) * 255)
-  b = Math.round((b + m) * 255)
-
-  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
-}
-
-function darkenColor(hex, percent) {
-  const [h, s, l] = hexToHsl(hex)
-  return hslToHex(h, s, Math.max(l - percent, 0))
-}
-
-function lightenColor(hex, percent) {
-  const [h, s, l] = hexToHsl(hex)
-  return hslToHex(h, s, Math.min(l + percent, 100))
-}
-
-function calculateContrastRatio(color1, color2) {
-  const getLuminance = (hex) => {
-    const r = parseInt(hex.slice(1, 3), 16) / 255
-    const g = parseInt(hex.slice(3, 5), 16) / 255
-    const b = parseInt(hex.slice(5, 7), 16) / 255
-    
-    const [rL, gL, bL] = [r, g, b].map(c => 
-      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
-    )
-    
-    return 0.2126 * rL + 0.7152 * gL + 0.0722 * bL
-  }
-  
-  const lum1 = getLuminance(color1)
-  const lum2 = getLuminance(color2)
-  const brightest = Math.max(lum1, lum2)
-  const darkest = Math.min(lum1, lum2)
-  
-  return (brightest + 0.05) / (darkest + 0.05)
-}
-
-function showNotification(message, type = "success") {
-  const notification = document.createElement("div")
-  notification.className = `notification ${type}`
-  
-  const colors = {
-    success: "#059669",
-    error: "#dc2626", 
-    warning: "#d97706",
-    info: "#0ea5e9"
-  }
-  
-  const icons = {
-    success: "✓",
-    error: "✗", 
-    warning: "⚠",
-    info: "ℹ"
-  }
-  
-  notification.style.cssText = `
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    padding: 16px 24px;
-    background: ${colors[type]};
-    color: white;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 14px;
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  `
-  
-  notification.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`
-  document.body.appendChild(notification)
-  
-  setTimeout(() => notification.style.transform = "translateX(0)", 100)
-  
-  setTimeout(() => {
-    notification.style.transform = "translateX(100%)"
-    setTimeout(() => document.body.removeChild(notification), 300)
-  }, 4000)
-}
-
-function showLoadingState(button) {
-  const content = button.querySelector(".btn-content")
-  const loading = button.querySelector(".btn-loading")
-  if (content) content.style.display = "none"
-  if (loading) loading.style.display = "flex"
-}
-
-function hideLoadingState(button) {
-  const content = button.querySelector(".btn-content")
-  const loading = button.querySelector(".btn-loading")
-  if (content) content.style.display = "flex"
-  if (loading) loading.style.display = "none"
-}
-
-function generateComprehensiveCSS() {
-  const colors = AppState.currentColors
-  const typography = AppState.currentTypography
-  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
-  
-  const baseSize = 16
-  const sizes = {
-    h1: Math.round(baseSize * Math.pow(scale, 3)),
-    h2: Math.round(baseSize * Math.pow(scale, 2.5)),
-    h3: Math.round(baseSize * Math.pow(scale, 2)),
-    h4: Math.round(baseSize * Math.pow(scale, 1.5)),
-    h5: Math.round(baseSize * Math.pow(scale, 1)),
-    h6: Math.round(baseSize * Math.pow(scale, 0.5))
-  }
-
-  return `/* StyleCraft Pro - Generated Design System */
-/* Generated: ${new Date().toLocaleDateString()} */
-
-:root {
-  /* Brand Colors */
-  --brand-primary: ${colors.primary};
-  --brand-secondary: ${colors.secondary};
-  --brand-accent: ${colors.accent};
-  --brand-text: ${colors.text};
-  
-  /* Extended Palette */
-  --color-primary-50: ${lightenColor(colors.primary, 95)};
-  --color-primary-100: ${lightenColor(colors.primary, 90)};
-  --color-primary-500: ${colors.primary};
-  --color-primary-600: ${darkenColor(colors.primary, 10)};
-  --color-primary-700: ${darkenColor(colors.primary, 20)};
-  --color-primary-900: ${darkenColor(colors.primary, 40)};
-  
-  /* Typography */
-  --font-family-heading: '${typography.heading}', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-family-body: '${typography.body}', -apple-system, BlinkMacSystemFont, sans-serif;
-  
-  /* Font Scale */
-  --font-scale: ${scale};
-  --font-size-h1: ${sizes.h1}px;
-  --font-size-h2: ${sizes.h2}px;
-  --font-size-h3: ${sizes.h3}px;
-  --font-size-h4: ${sizes.h4}px;
-  --font-size-h5: ${sizes.h5}px;
-  --font-size-h6: ${sizes.h6}px;
-  --font-size-base: ${baseSize}px;
-  
-  /* Spacing */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  
-  /* Border Radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-full: 9999px;
-}
-
-/* Base Typography */
-body {
-  font-family: var(--font-family-body);
-  color: var(--brand-text);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-heading);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--brand-text);
-  margin-bottom: var(--space-4);
-}
-
-h1 { font-size: var(--font-size-h1); }
-h2 { font-size: var(--font-size-h2); }
-h3 { font-size: var(--font-size-h3); }
-h4 { font-size: var(--font-size-h4); }
-h5 { font-size: var(--font-size-h5); }
-h6 { font-size: var(--font-size-h6); }
-
-/* Button System */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-6);
-  font-weight: 600;
-  border-radius: var(--radius-lg);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-decoration: none;
-}
-
-.btn-primary {
-  background-color: var(--brand-primary);
-  color: var(--color-primary-50);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-primary:hover {
-  background-color: var(--color-primary-600);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-secondary {
-  background-color: transparent;
-  color: var(--brand-primary);
-  border-color: var(--brand-primary);
-}
-
-.btn-secondary:hover {
-  background-color: var(--brand-primary);
-  color: var(--color-primary-50);
-}
-
-/* Card System */
-.card {
-  background: white;
-  border: 1px solid var(--brand-accent);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  transition: all 0.2s;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.card-header {
-  padding: var(--space-6);
-  border-bottom: 1px solid var(--brand-accent);
-}
-
-.card-body {
-  padding: var(--space-6);
-}
-
-/* Form Elements */
-.form-input,
-.form-select,
-.form-textarea {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--brand-accent);
-  border-radius: var(--radius-lg);
-  font-family: inherit;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
-  outline: none;
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Utility Classes */
-.text-primary { color: var(--brand-primary); }
-.text-secondary { color: var(--brand-secondary); }
-.bg-primary { background-color: var(--brand-primary); }
-.bg-accent { background-color: var(--brand-accent); }
-
-.shadow-sm { box-shadow: var(--shadow-sm); }
-.shadow-md { box-shadow: var(--shadow-md); }
-.shadow-lg { box-shadow: var(--shadow-lg); }
-
-.rounded-sm { border-radius: var(--radius-sm); }
-.rounded-md { border-radius: var(--radius-md); }
-.rounded-lg { border-radius: var(--radius-lg); }
-.rounded-xl { border-radius: var(--radius-xl); }
-
-/* Responsive Typography */
-@media (max-width: 768px) {
-  h1 { font-size: calc(var(--font-size-h1) * 0.8); }
-  h2 { font-size: calc(var(--font-size-h2) * 0.85); }
-  h3 { font-size: calc(var(--font-size-h3) * 0.9); }
-}`
-}
-
-function downloadFile(content, filename, type) {
-  const blob = new Blob([content], { type })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement("a")
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-function generateStyleBreakdown(colors, typography, industry, positioning, scale) {
-  const [h, s, l] = hexToHsl(colors.primary)
-  
-  return [
-    {
-      title: "Color Psychology Analysis",
-      description: `Your primary color has ${Math.round(s)}% saturation and ${Math.round(l)}% lightness, creating ${s > 50 ? "vibrant, energetic" : "sophisticated, professional"} brand presence perfect for ${industry} companies.`
-    },
-    {
-      title: "Typography Pairing",
-      description: `${typography.heading} and ${typography.body} combination enhances readability and brand perception, optimized for ${positioning} positioning in the ${industry} sector.`
-    },
-    {
-      title: "Mathematical Scale",
-      description: `${scale} modular scale creates harmonious proportions with ${Math.round((scale - 1) * 100)}% size progression, ensuring consistent visual hierarchy.`
-    },
-    {
-      title: "Accessibility Compliance",
-      description: `Color combinations meet WCAG AA standards with proper contrast ratios, ensuring your design is accessible to all users including those with visual impairments.`
-    }
-  ]
-}
-
-function displayBreakdown(breakdown) {
-  const section = document.getElementById("breakdownSection")
-  const content = document.getElementById("breakdownContent")
-  
-  if (content) {
-    content.innerHTML = breakdown.map(item => `
-      <div class="breakdown-item">
-        <h5>${item.title}</h5>
-        <p>${item.description}</p>
-      </div>
-    `).join("")
-  }
-  
-  if (section) section.style.display = "block"
-}
-
-function updatePreviewContent(industry) {
-  const content = {
-    tech: {
-      title: "Transform Your Digital Future",
-      subtitle: "Enterprise-grade technology solutions",
-      body: "We deliver cutting-edge technology solutions that drive business transformation.",
-      cta: "Start Innovation"
-    },
-    finance: {
-      title: "Secure Your Financial Future", 
-      subtitle: "Trusted wealth management expertise",
-      body: "Professional financial planning and investment strategies for long-term growth.",
-      cta: "Schedule Consultation"
-    },
-    creative: {
-      title: "Bring Your Vision to Life",
-      subtitle: "Award-winning creative solutions", 
-      body: "We create compelling brand experiences that resonate and drive engagement.",
-      cta: "View Portfolio"
-    }
-  }
-  
-  const selected = content[industry] || content.tech
-  
-  const heroTitle = document.querySelector("#hero h1")
-  const heroSubtitle = document.querySelector("#hero .subtitle")
-  const heroBody = document.querySelector("#hero .body-text")
-  const heroCta = document.querySelector("#hero .cta-button.primary")
-  
-  if (heroTitle) heroTitle.textContent = selected.title
-  if (heroSubtitle) heroSubtitle.textContent = selected.subtitle
-  if (heroBody) heroBody.textContent = selected.body
-  if (heroCta) heroCta.textContent = selected.cta
-}
-
-function updateFinalRecommendations(industry, positioning) {
-  const recommendationText = document.getElementById("recommendationText")
-  const confidenceScore = document.getElementById("confidenceScore")
-  
-  const confidence = calculateConfidence(industry, positioning)
-  
-  if (confidenceScore) confidenceScore.textContent = `${confidence}%`
-  if (recommendationText) {
-    recommendationText.textContent = `Professional style guide complete! Your ${positioning} ${industry} brand achieves ${confidence}% design alignment with industry best practices.`
-  }
-}
-
-function calculateConfidence(industry, positioning) {
-  let score = 85 // Base confidence
-  
-  // Industry-specific adjustments
-  const industryBonus = {
-    tech: 5,
-    finance: 8,
-    creative: 3,
-    healthcare: 7
-  }
-  
-  score += industryBonus[industry] || 0
-  
-  // Logo analysis bonus
-  if (AppState.logoAnalysis) score += 8
-  
-  return Math.min(score, 98)
-}
-
-// Error handling
-window.addEventListener("error", (event) => {
-  console.error("Application error:", event.error)
-  showNotification("An unexpected error occurred. Please try again.", "error")
-})
-
-window.addEventListener("unhandledrejection", (event) => {
-  console.error("Unhandled promise rejection:", event.reason)
-  showNotification("An error occurred while processing your request.", "error")
-  event.preventDefault()
-})
-
-// Initialize the application when everything is loaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('StyleCraft Pro initialized successfully')
-  })
-} else {
-  console.log('StyleCraft Pro initialized successfully')
-}// StyleCraft Pro - Complete Fixed Application Logic
+// StyleCraft Pro - Complete Fixed Application Logic
 document.addEventListener("DOMContentLoaded", () => {
   initializeApp()
   setupEventListeners()
@@ -841,11 +28,6 @@ function initializeApp() {
   setupAccessibilityChecker()
   setupLogoUpload()
   updatePreviewInRealTime()
-  
-  // Show onboarding for first-time users
-  if (!localStorage.getItem("stylecraft-visited")) {
-    setTimeout(showOnboarding, 1000)
-  }
 }
 
 function initializeTheme() {
@@ -1424,4 +606,793 @@ function generateIntelligentTypographyPair(industry, positioning) {
       bold: { heading: "Montserrat", body: "Roboto" }
     },
     ecommerce: {
-      friendly:
+      friendly: { heading: "Montserrat", body: "Open Sans" },
+      luxury: { heading: "Playfair Display", body: "Lora" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      professional: { heading: "Inter", body: "Inter" },
+      trustworthy: { heading: "Lora", body: "Inter" },
+      innovative: { heading: "Montserrat", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Roboto" }
+    },
+    consulting: {
+      professional: { heading: "Playfair Display", body: "Inter" },
+      trustworthy: { heading: "Lora", body: "Inter" },
+      luxury: { heading: "Playfair Display", body: "Lora" },
+      innovative: { heading: "Montserrat", body: "Inter" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      playful: { heading: "Poppins", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Roboto" }
+    },
+    education: {
+      professional: { heading: "Lora", body: "Inter" },
+      trustworthy: { heading: "Source Sans Pro", body: "Source Sans Pro" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      innovative: { heading: "Poppins", body: "Inter" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      luxury: { heading: "Playfair Display", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Inter" }
+    },
+    nonprofit: {
+      trustworthy: { heading: "Lora", body: "Inter" },
+      friendly: { heading: "Open Sans", body: "Open Sans" },
+      professional: { heading: "Source Sans Pro", body: "Source Sans Pro" },
+      innovative: { heading: "Poppins", body: "Inter" },
+      playful: { heading: "Poppins", body: "Open Sans" },
+      luxury: { heading: "Playfair Display", body: "Inter" },
+      minimalist: { heading: "Inter", body: "Inter" },
+      bold: { heading: "Montserrat", body: "Inter" }
+    }
+  }
+  
+  // Get the specific pair or fallback to a safe default
+  const industryPairs = pairs[industry]
+  if (!industryPairs) {
+    return { heading: "Inter", body: "Inter" }
+  }
+  
+  const selectedPair = industryPairs[positioning]
+  if (!selectedPair) {
+    // Fallback to the first available pair for the industry
+    const firstKey = Object.keys(industryPairs)[0]
+    return industryPairs[firstKey] || { heading: "Inter", body: "Inter" }
+  }
+  
+  return selectedPair
+}
+
+function setupExportButtons() {
+  document.getElementById("copyCssBtn")?.addEventListener("click", async () => {
+    const css = generateComprehensiveCSS()
+    try {
+      await navigator.clipboard.writeText(css)
+      showNotification("Complete CSS framework copied to clipboard!", "success")
+    } catch (err) {
+      showNotification("Failed to copy CSS", "error")
+    }
+  })
+
+  document.getElementById("downloadPackageBtn")?.addEventListener("click", () => {
+    const css = generateComprehensiveCSS()
+    downloadFile(css, `stylecraft-pro-${Date.now()}.css`, "text/css")
+    showNotification("CSS framework downloaded!", "success")
+  })
+}
+
+function setupFormListeners() {
+  // Industry and positioning changes
+  ["industry", "positioning", "fontScale", "coreFont"].forEach(id => {
+    document.getElementById(id)?.addEventListener("change", () => {
+      updatePreviewInRealTime()
+    })
+  })
+}
+
+function setupStyleGuideGeneration() {
+  const generateBtn = document.getElementById("generateBtn")
+  
+  generateBtn?.addEventListener("click", () => {
+    showLoadingState(generateBtn)
+    
+    setTimeout(() => {
+      generateCompleteStyleGuide()
+      hideLoadingState(generateBtn)
+      showNotification("Professional style guide generated!", "success")
+    }, 1500)
+  })
+}
+
+function generateCompleteStyleGuide() {
+  const industry = document.getElementById("industry").value
+  const positioning = document.getElementById("positioning").value
+  const scale = parseFloat(document.getElementById("fontScale").value)
+  
+  // Update content based on industry
+  updatePreviewContent(industry)
+  
+  // Generate breakdown
+  const breakdown = generateStyleBreakdown(AppState.currentColors, AppState.currentTypography, industry, positioning, scale)
+  displayBreakdown(breakdown)
+  
+  // Update final recommendations
+  updateFinalRecommendations(industry, positioning)
+}
+
+function updatePreviewInRealTime() {
+  const scale = parseFloat(document.getElementById("fontScale").value || "1.25")
+  
+  // Apply colors to CSS variables
+  const root = document.documentElement
+  root.style.setProperty("--accent-color", AppState.currentColors.primary)
+  root.style.setProperty("--accent-hover", darkenColor(AppState.currentColors.primary, 10))
+  root.style.setProperty("--success-color", AppState.currentColors.accent)
+  root.style.setProperty("--text-primary", AppState.currentColors.text)
+  
+  // Apply typography
+  const preview = document.getElementById("previewContent")
+  if (preview) {
+    preview.style.fontFamily = `'${AppState.currentTypography.body}', sans-serif`
+    
+    const headings = preview.querySelectorAll("h1, h2, h3, h4, .nav-logo")
+    headings.forEach(heading => {
+      heading.style.fontFamily = `'${AppState.currentTypography.heading}', sans-serif`
+    })
+    
+    // Apply font sizes based on scale
+    applyModularScale(preview, scale)
+  }
+}
+
+function applyModularScale(container, scale) {
+  const baseSize = 16
+  const sizes = {
+    h1: Math.round(baseSize * Math.pow(scale, 3)),
+    h2: Math.round(baseSize * Math.pow(scale, 2.5)),
+    h3: Math.round(baseSize * Math.pow(scale, 2)),
+    h4: Math.round(baseSize * Math.pow(scale, 1.5))
+  }
+  
+  Object.entries(sizes).forEach(([tag, size]) => {
+    const elements = container.querySelectorAll(tag)
+    elements.forEach(el => {
+      el.style.fontSize = `${size}px`
+      el.style.lineHeight = size > 36 ? "1.1" : "1.2"
+    })
+  })
+}
+
+function setupEnhancedFeatures() {
+  setupAccessibilityChecker()
+  setupColorHarmony()
+  setupVariationButtons()
+  setupViewControls()
+}
+
+function setupAccessibilityChecker() {
+  updateAccessibilityScore()
+}
+
+function updateAccessibilityScore() {
+  const body = document.body
+  const bgColor = body.hasAttribute("data-theme") ? "#0f172a" : "#ffffff"
+  const textColor = AppState.currentColors.text || "#111827"
+  const primaryColor = AppState.currentColors.primary || "#000000"
+  
+  const textContrast = calculateContrastRatio(bgColor, textColor)
+  const primaryContrast = calculateContrastRatio(bgColor, primaryColor)
+  
+  // Update UI elements safely
+  const scoreEl = document.getElementById("accessibilityScore")
+  const ratioEl = document.getElementById("contrastRatio")
+  const colorBlindEl = document.getElementById("colorBlindSafe")
+  const printCompatibleEl = document.getElementById("printCompatible")
+  
+  if (ratioEl) ratioEl.textContent = `${textContrast.toFixed(1)}:1`
+  
+  let score = "AA"
+  if (textContrast >= 7 && primaryContrast >= 4.5) score = "AAA"
+  else if (textContrast < 4.5 || primaryContrast < 3) score = "Fail"
+  
+  if (scoreEl) {
+    scoreEl.textContent = score
+    scoreEl.className = `accessibility-score ${score.toLowerCase()}`
+  }
+  
+  // Update additional accessibility info
+  if (colorBlindEl) {
+    const isColorBlindSafe = checkColorBlindSafety(textColor, primaryColor)
+    colorBlindEl.textContent = isColorBlindSafe ? "✓ Yes" : "⚠ Review"
+  }
+  
+  if (printCompatibleEl) {
+    const isPrintCompatible = checkPrintCompatibility(textColor, primaryColor)
+    printCompatibleEl.textContent = isPrintCompatible ? "✓ Yes" : "⚠ Review"
+  }
+}
+
+function checkColorBlindSafety(textColor, primaryColor) {
+  // Simple check - in a real implementation, you'd use more sophisticated algorithms
+  const textContrast = calculateContrastRatio("#ffffff", textColor)
+  const primaryContrast = calculateContrastRatio("#ffffff", primaryColor)
+  return textContrast >= 3 && primaryContrast >= 3
+}
+
+function checkPrintCompatibility(textColor, primaryColor) {
+  // Check if colors work well in print (high contrast, not too light)
+  const [, , textL] = hexToHsl(textColor)
+  const [, , primaryL] = hexToHsl(primaryColor)
+  return textL < 80 && primaryL < 90 // Not too light for print
+}
+
+function setupColorHarmony() {
+  // Initialize harmony indicators for existing colors
+  Object.keys(AppState.currentColors).forEach(key => {
+    const colorValue = AppState.currentColors[key]
+    updateColorHarmony(colorValue, key)
+  })
+}
+
+function updateColorHarmony(color, prefix) {
+  const harmonyEl = document.getElementById(`${prefix}Harmony`)
+  if (!harmonyEl) return
+  
+  const [h, s, l] = hexToHsl(color)
+  const complementary = hslToHex((h + 180) % 360, s, l)
+  const analogous1 = hslToHex((h + 30) % 360, s, l)
+  const analogous2 = hslToHex((h - 30 + 360) % 360, s, l)
+  
+  harmonyEl.style.background = `linear-gradient(90deg, ${color} 0%, ${analogous1} 33%, ${complementary} 66%, ${analogous2} 100%)`
+}
+
+function setupVariationButtons() {
+  const buttons = document.querySelectorAll(".variation-btn")
+  
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      buttons.forEach(b => b.classList.remove("active"))
+      btn.classList.add("active")
+      
+      const variation = btn.dataset.variation
+      applyStyleVariation(variation)
+    })
+  })
+}
+
+function applyStyleVariation(variation) {
+  const variations = {
+    conservative: { saturationMult: 0.7, lightnessAdj: 10 },
+    balanced: { saturationMult: 1.0, lightnessAdj: 0 },
+    bold: { saturationMult: 1.3, lightnessAdj: -5 }
+  }
+  
+  const config = variations[variation]
+  if (!config) return
+  
+  const [h, s, l] = hexToHsl(AppState.currentColors.primary)
+  const newS = Math.min(s * config.saturationMult, 100)
+  const newL = Math.max(Math.min(l + config.lightnessAdj, 100), 0)
+  
+  const adjustedColor = hslToHex(h, newS, newL)
+  updateColorInput("primaryColor", "primaryColorText", adjustedColor, "primary")
+  
+  updatePreviewInRealTime()
+  showNotification(`Applied ${variation} style variation!`, "success")
+}
+
+function setupViewControls() {
+  const viewBtns = document.querySelectorAll(".view-btn")
+
+  viewBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      viewBtns.forEach(b => b.classList.remove("active"))
+      btn.classList.add("active")
+
+      const view = btn.dataset.view
+      applyViewMode(view)
+    })
+  })
+}
+
+function applyViewMode(view) {
+  const previewContent = document.getElementById("previewContent")
+
+  // Remove existing view classes
+  previewContent.classList.remove("desktop-view", "mobile-view", "accessibility-view")
+
+  // Add new view class
+  previewContent.classList.add(`${view}-view`)
+
+  if (view === "mobile") {
+    previewContent.style.maxWidth = "375px"
+    previewContent.style.margin = "0 auto"
+  } else if (view === "accessibility") {
+    // Apply high contrast mode
+    previewContent.style.filter = "contrast(1.5)"
+  } else {
+    previewContent.style.maxWidth = ""
+    previewContent.style.margin = ""
+    previewContent.style.filter = ""
+  }
+}
+
+// Utility Functions
+function rgbToHex(r, g, b) {
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+}
+
+function hexToHsl(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h, s, l = (max + min) / 2
+
+  if (max === min) {
+    h = s = 0
+  } else {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break
+      case g: h = (b - r) / d + 2; break
+      case b: h = (r - g) / d + 4; break
+    }
+    h /= 6
+  }
+
+  return [h * 360, s * 100, l * 100]
+}
+
+function hslToHex(h, s, l) {
+  h /= 360; s /= 100; l /= 100
+  const c = (1 - Math.abs(2 * l - 1)) * s
+  const x = c * (1 - Math.abs(((h * 6) % 2) - 1))
+  const m = l - c / 2
+  let r = 0, g = 0, b = 0
+
+  if (0 <= h && h < 1/6) { r = c; g = x; b = 0 }
+  else if (1/6 <= h && h < 1/3) { r = x; g = c; b = 0 }
+  else if (1/3 <= h && h < 1/2) { r = 0; g = c; b = x }
+  else if (1/2 <= h && h < 2/3) { r = 0; g = x; b = c }
+  else if (2/3 <= h && h < 5/6) { r = x; g = 0; b = c }
+  else if (5/6 <= h && h < 1) { r = c; g = 0; b = x }
+
+  r = Math.round((r + m) * 255)
+  g = Math.round((g + m) * 255)
+  b = Math.round((b + m) * 255)
+
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+}
+
+function darkenColor(hex, percent) {
+  const [h, s, l] = hexToHsl(hex)
+  return hslToHex(h, s, Math.max(l - percent, 0))
+}
+
+function lightenColor(hex, percent) {
+  const [h, s, l] = hexToHsl(hex)
+  return hslToHex(h, s, Math.min(l + percent, 100))
+}
+
+function calculateContrastRatio(color1, color2) {
+  const getLuminance = (hex) => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255
+    const g = parseInt(hex.slice(3, 5), 16) / 255
+    const b = parseInt(hex.slice(5, 7), 16) / 255
+    
+    const [rL, gL, bL] = [r, g, b].map(c => 
+      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+    )
+    
+    return 0.2126 * rL + 0.7152 * gL + 0.0722 * bL
+  }
+  
+  const lum1 = getLuminance(color1)
+  const lum2 = getLuminance(color2)
+  const brightest = Math.max(lum1, lum2)
+  const darkest = Math.min(lum1, lum2)
+  
+  return (brightest + 0.05) / (darkest + 0.05)
+}
+
+function showNotification(message, type = "success") {
+  const notification = document.createElement("div")
+  notification.className = `notification ${type}`
+  
+  const colors = {
+    success: "#059669",
+    error: "#dc2626", 
+    warning: "#d97706",
+    info: "#0ea5e9"
+  }
+  
+  const icons = {
+    success: "✓",
+    error: "✗", 
+    warning: "⚠",
+    info: "ℹ"
+  }
+  
+  notification.style.cssText = `
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    padding: 16px 24px;
+    background: ${colors[type]};
+    color: white;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  `
+  
+  notification.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`
+  document.body.appendChild(notification)
+  
+  setTimeout(() => notification.style.transform = "translateX(0)", 100)
+  
+  setTimeout(() => {
+    notification.style.transform = "translateX(100%)"
+    setTimeout(() => document.body.removeChild(notification), 300)
+  }, 4000)
+}
+
+function showLoadingState(button) {
+  const content = button.querySelector(".btn-content")
+  const loading = button.querySelector(".btn-loading")
+  if (content) content.style.display = "none"
+  if (loading) loading.style.display = "flex"
+}
+
+function hideLoadingState(button) {
+  const content = button.querySelector(".btn-content")
+  const loading = button.querySelector(".btn-loading")
+  if (content) content.style.display = "flex"
+  if (loading) loading.style.display = "none"
+}
+
+function generateComprehensiveCSS() {
+  const colors = AppState.currentColors
+  const typography = AppState.currentTypography
+  const scale = parseFloat(document.getElementById("fontScale")?.value || "1.25")
+  
+  const baseSize = 16
+  const sizes = {
+    h1: Math.round(baseSize * Math.pow(scale, 3)),
+    h2: Math.round(baseSize * Math.pow(scale, 2.5)),
+    h3: Math.round(baseSize * Math.pow(scale, 2)),
+    h4: Math.round(baseSize * Math.pow(scale, 1.5)),
+    h5: Math.round(baseSize * Math.pow(scale, 1)),
+    h6: Math.round(baseSize * Math.pow(scale, 0.5))
+  }
+
+  return `/* StyleCraft Pro - Generated Design System */
+/* Generated: ${new Date().toLocaleDateString()} */
+
+:root {
+  /* Brand Colors */
+  --brand-primary: ${colors.primary};
+  --brand-secondary: ${colors.secondary};
+  --brand-accent: ${colors.accent};
+  --brand-text: ${colors.text};
+  
+  /* Extended Palette */
+  --color-primary-50: ${lightenColor(colors.primary, 95)};
+  --color-primary-100: ${lightenColor(colors.primary, 90)};
+  --color-primary-500: ${colors.primary};
+  --color-primary-600: ${darkenColor(colors.primary, 10)};
+  --color-primary-700: ${darkenColor(colors.primary, 20)};
+  --color-primary-900: ${darkenColor(colors.primary, 40)};
+  
+  /* Typography */
+  --font-family-heading: '${typography.heading}', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-body: '${typography.body}', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Font Scale */
+  --font-scale: ${scale};
+  --font-size-h1: ${sizes.h1}px;
+  --font-size-h2: ${sizes.h2}px;
+  --font-size-h3: ${sizes.h3}px;
+  --font-size-h4: ${sizes.h4}px;
+  --font-size-h5: ${sizes.h5}px;
+  --font-size-h6: ${sizes.h6}px;
+  --font-size-base: ${baseSize}px;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+}
+
+/* Base Typography */
+body {
+  font-family: var(--font-family-body);
+  color: var(--brand-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--brand-text);
+  margin-bottom: var(--space-4);
+}
+
+h1 { font-size: var(--font-size-h1); }
+h2 { font-size: var(--font-size-h2); }
+h3 { font-size: var(--font-size-h3); }
+h4 { font-size: var(--font-size-h4); }
+h5 { font-size: var(--font-size-h5); }
+h6 { font-size: var(--font-size-h6); }
+
+/* Button System */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--brand-primary);
+  color: var(--color-primary-50);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--brand-primary);
+  color: var(--color-primary-50);
+}
+
+/* Card System */
+.card {
+  background: white;
+  border: 1px solid var(--brand-accent);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--brand-accent);
+}
+
+.card-body {
+  padding: var(--space-6);
+}
+
+/* Form Elements */
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--brand-accent);
+  border-radius: var(--radius-lg);
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Utility Classes */
+.text-primary { color: var(--brand-primary); }
+.text-secondary { color: var(--brand-secondary); }
+.bg-primary { background-color: var(--brand-primary); }
+.bg-accent { background-color: var(--brand-accent); }
+
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  h1 { font-size: calc(var(--font-size-h1) * 0.8); }
+  h2 { font-size: calc(var(--font-size-h2) * 0.85); }
+  h3 { font-size: calc(var(--font-size-h3) * 0.9); }
+}`
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function generateStyleBreakdown(colors, typography, industry, positioning, scale) {
+  const [h, s, l] = hexToHsl(colors.primary)
+  
+  return [
+    {
+      title: "Color Psychology Analysis",
+      description: `Your primary color has ${Math.round(s)}% saturation and ${Math.round(l)}% lightness, creating ${s > 50 ? "vibrant, energetic" : "sophisticated, professional"} brand presence perfect for ${industry} companies.`
+    },
+    {
+      title: "Typography Pairing",
+      description: `${typography.heading} and ${typography.body} combination enhances readability and brand perception, optimized for ${positioning} positioning in the ${industry} sector.`
+    },
+    {
+      title: "Mathematical Scale",
+      description: `${scale} modular scale creates harmonious proportions with ${Math.round((scale - 1) * 100)}% size progression, ensuring consistent visual hierarchy.`
+    },
+    {
+      title: "Accessibility Compliance",
+      description: `Color combinations meet WCAG AA standards with proper contrast ratios, ensuring your design is accessible to all users including those with visual impairments.`
+    }
+  ]
+}
+
+function displayBreakdown(breakdown) {
+  const section = document.getElementById("breakdownSection")
+  const content = document.getElementById("breakdownContent")
+  
+  if (content) {
+    content.innerHTML = breakdown.map(item => `
+      <div class="breakdown-item">
+        <h5>${item.title}</h5>
+        <p>${item.description}</p>
+      </div>
+    `).join("")
+  }
+  
+  if (section) section.style.display = "block"
+}
+
+function updatePreviewContent(industry) {
+  const content = {
+    tech: {
+      title: "Transform Your Digital Future",
+      subtitle: "Enterprise-grade technology solutions",
+      body: "We deliver cutting-edge technology solutions that drive business transformation.",
+      cta: "Start Innovation"
+    },
+    finance: {
+      title: "Secure Your Financial Future", 
+      subtitle: "Trusted wealth management expertise",
+      body: "Professional financial planning and investment strategies for long-term growth.",
+      cta: "Schedule Consultation"
+    },
+    creative: {
+      title: "Bring Your Vision to Life",
+      subtitle: "Award-winning creative solutions", 
+      body: "We create compelling brand experiences that resonate and drive engagement.",
+      cta: "View Portfolio"
+    }
+  }
+  
+  const selected = content[industry] || content.tech
+  
+  const heroTitle = document.querySelector("#hero h1")
+  const heroSubtitle = document.querySelector("#hero .subtitle")
+  const heroBody = document.querySelector("#hero .body-text")
+  const heroCta = document.querySelector("#hero .cta-button.primary")
+  
+  if (heroTitle) heroTitle.textContent = selected.title
+  if (heroSubtitle) heroSubtitle.textContent = selected.subtitle
+  if (heroBody) heroBody.textContent = selected.body
+  if (heroCta) heroCta.textContent = selected.cta
+}
+
+function updateFinalRecommendations(industry, positioning) {
+  const recommendationText = document.getElementById("recommendationText")
+  const confidenceScore = document.getElementById("confidenceScore")
+  
+  const confidence = calculateConfidence(industry, positioning)
+  
+  if (confidenceScore) confidenceScore.textContent = `${confidence}%`
+  if (recommendationText) {
+    recommendationText.textContent = `Professional style guide complete! Your ${positioning} ${industry} brand achieves ${confidence}% design alignment with industry best practices.`
+  }
+}
+
+function calculateConfidence(industry, positioning) {
+  let score = 85 // Base confidence
+  
+  // Industry-specific adjustments
+  const industryBonus = {
+    tech: 5,
+    finance: 8,
+    creative: 3,
+    healthcare: 7
+  }
+  
+  score += industryBonus[industry] || 0
+  
+  // Logo analysis bonus
+  if (AppState.logoAnalysis) score += 8
+  
+  return Math.min(score, 98)
+}
+
+// Error handling
+window.addEventListener("error", (event) => {
+  console.error("Application error:", event.error)
+  showNotification("An unexpected error occurred. Please try again.", "error")
+})
+
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("Unhandled promise rejection:", event.reason)
+  showNotification("An error occurred while processing your request.", "error")
+  event.preventDefault()
+})
+
+// Initialize the application when everything is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('StyleCraft Pro initialized successfully')
+  })
+} else {
+  console.log('StyleCraft Pro initialized successfully')
+}
